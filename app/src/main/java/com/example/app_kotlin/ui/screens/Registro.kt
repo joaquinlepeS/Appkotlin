@@ -3,40 +3,63 @@ package com.example.app_kotlin.ui.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
+import com.example.app_kotlin.R
 import com.example.app_kotlin.utils.validateEmail
 import com.example.app_kotlin.utils.validateLogin
 import com.example.app_kotlin.utils.validatePassword
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import com.example.app_kotlin.R
 
 @Preview
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen( onNavigateToRegistro: () -> Unit) {
+@OptIn(ExperimentalMaterial3Api::class)
+fun RegistroScreen( ){
 
+    var usuario by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var password1 by remember { mutableStateOf("") }
+    var password2 by remember { mutableStateOf("") }
 
     // Estados de errores
     var emailError by remember { mutableStateOf<String?>(null) }
@@ -76,25 +99,25 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit) {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .background(Color.Black.copy(alpha = 0.3f)) ,
+                .background(Color.Black.copy(alpha = 0.3f)) ,
                 contentAlignment = Alignment.Center,
 
                 ) {
                 Card(
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.onSurfaceVariant),
-                    border = BorderStroke(16.dp, Color.Transparent), //
-                    elevation = CardDefaults.cardElevation(36.dp),
+                    border = BorderStroke(2.dp, Color.Transparent), // grosor y color del borde
+                    elevation = CardDefaults.cardElevation(40.dp),
                     modifier = Modifier.padding(16.dp)
 
 
-                ) {
+                    ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     )
                     {
                         Text(
-                            text = "Inicia Sesion",
+                            text = "Registrate",
                             fontSize = 26.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(vertical = 24.dp),
@@ -102,6 +125,25 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit) {
 
 
                             )
+                        OutlinedTextField(
+                            value = usuario,
+                            onValueChange = {
+                                usuario = it
+                                emailError = validateEmail(email) // validación en tiempo real
+                            },
+                            label = { Text("Usuario") },
+                            singleLine = true,
+                            modifier = Modifier.padding(3.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                                cursorColor = MaterialTheme.colorScheme.primary,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                focusedLabelColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
 
                         OutlinedTextField(
                             value = email,
@@ -109,7 +151,7 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit) {
                                 email = it
                                 emailError = validateEmail(email) // validación en tiempo real
                             },
-                            label = { Text("Usuario") },
+                            label = { Text("Email") },
                             singleLine = true,
                             modifier = Modifier.padding(3.dp),
                             colors = TextFieldDefaults.colors(
@@ -133,12 +175,12 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit) {
                         Spacer(modifier = Modifier.height(20.dp))
 
                         OutlinedTextField(
-                            value = password,
+                            value = password1,
                             onValueChange = {
-                                password = it
-                                passwordError = validatePassword(password)
+                                password1 = it
+                                passwordError = validatePassword(password1)
                             },
-                            label = { Text("Contraseña") },
+                            label = { Text("Ingrese Contraseña") },
                             singleLine = true,
                             visualTransformation = PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -162,13 +204,36 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit) {
                             )
                         }
 
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        OutlinedTextField(
+                            value = password1,
+                            onValueChange = {
+                                password1 = it
+                                passwordError = validatePassword(password1)
+                            },
+                            label = { Text("Repita Contraseña") },
+                            singleLine = true,
+                            visualTransformation = PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            modifier = Modifier.padding(3.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                                cursorColor = MaterialTheme.colorScheme.primary,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                focusedLabelColor = MaterialTheme.colorScheme.primaryContainer
+
+                            )
+                        )
+
 
                         Spacer(modifier = Modifier.height(24.dp))
 
                         Button(
                             onClick = {
 
-                                val errors = validateLogin(email, password)
+                                val errors = validateLogin(email, password1)
                                 emailError = errors.emailError
                                 passwordError = errors.passwordError
 
@@ -197,7 +262,7 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit) {
                             Spacer(modifier = Modifier.width(4.dp)) // espacio entre Text y TextButton
 
                             TextButton(
-                                onClick = { onNavigateToRegistro() },
+                                onClick = {},
                                 contentPadding = PaddingValues(0.dp) // elimina padding interno si quieres que quede pegado al texto
                             ) {
                                 Text(
@@ -214,3 +279,4 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit) {
         }
     }
 }
+

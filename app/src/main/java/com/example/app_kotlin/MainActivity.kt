@@ -7,6 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
+import com.example.app_kotlin.navigation.AppNavHost
 import com.example.logincompose.ui.theme.LoginComposeTheme
 import com.example.app_kotlin.ui.screens.LoginScreen
 
@@ -20,7 +22,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.background
                 ) {
-                    LoginScreen()
+                    AppNavHost()
                 }
             }
         }

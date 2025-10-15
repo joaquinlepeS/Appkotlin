@@ -1,5 +1,7 @@
 package com.example.app_kotlin.ui.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -23,7 +25,10 @@ import com.example.app_kotlin.utils.validateLogin
 import com.example.app_kotlin.utils.validatePassword
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.draw.clip
-
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.example.app_kotlin.R.drawable
 
 @Preview
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,163 +41,164 @@ fun LoginScreen() {
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
 
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Bienvenido a tu app",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-                modifier = Modifier.clip(RoundedCornerShape(bottomStart = 6.dp, bottomEnd = 16.dp)),
-
-                )
-        },
-
-        ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(32.dp)
-                .background(MaterialTheme.colorScheme.inverseOnSurface)
-                .border(
-                    width = 1.dp, shape = RoundedCornerShape(16.dp),
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.secondary
-                        )
-
-                    )
-                ),
-
-            contentAlignment = Alignment.Center,
-
-            ) {
-            Card(
-                colors = CardDefaults.cardColors(MaterialTheme.colorScheme.background)
-
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                )
-                {
-                    Text(
-                        text = "Inicia Sesion",
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(vertical =  24.dp),
-                        color = MaterialTheme.colorScheme.primary,
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Imagen de fondo
+        Image(
+            painter = painterResource(id = R.drawable.wallpaper.jpeg ),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
 
 
-                        )
-
-                    OutlinedTextField(
-                        value = email,
-                        onValueChange = {
-                            email = it
-                            emailError = validateEmail(email) // validación en tiempo real
-                        },
-                        label = { Text("Usuario") },
-                        singleLine = true,
-                        modifier = Modifier.padding(3.dp),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                            cursorColor = MaterialTheme.colorScheme.primary,
-                            focusedTextColor = MaterialTheme.colorScheme.onSurface
-                        )
-                    )
-
-                    if (emailError != null) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
                         Text(
-                            text = emailError!!,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                            "Bienvenido a tu app",
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                         )
-                    }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ),
+                    modifier = Modifier.clip(RoundedCornerShape(bottomStart = 6.dp, bottomEnd = 16.dp)),
 
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    OutlinedTextField(
-                        value = password,
-                        onValueChange = {
-                            password = it
-                            passwordError = validatePassword(password)
-                        },
-                        label = { Text("Contraseña") },
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        modifier = Modifier.padding(3.dp),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                            cursorColor = MaterialTheme.colorScheme.primary,
-                            focusedTextColor = MaterialTheme.colorScheme.onSurface
-                        )
                     )
+            },
 
-                    if (passwordError != null) {
+            ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(32.dp)
+                    .background(MaterialTheme.colorScheme.inverseOnSurface),
+                contentAlignment = Alignment.Center,
+
+                ) {
+                Card(
+                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer),
+                    border = BorderStroke(2.dp, Color.Transparent), // grosor y color del borde
+                    elevation = CardDefaults.cardElevation(8.dp)
+
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    )
+                    {
                         Text(
-                            text = passwordError!!,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                        )
-                    }
-
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Button(
-                        onClick = {
-
-                            val errors = validateLogin(email, password)
-                            emailError = errors.emailError
-                            passwordError = errors.passwordError
-
-                            if (errors.emailError == null && errors.passwordError == null) {
-
-                            }
-                        },
-                        modifier = Modifier.padding(6.dp)
-                    ) {
-                        Text("Entrar")
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "¿No tienes una cuenta?",
-                            style = MaterialTheme.typography.bodySmall,
+                            text = "Inicia Sesion",
+                            fontSize = 26.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.secondary
+                            modifier = Modifier.padding(vertical = 24.dp),
+                            color = MaterialTheme.colorScheme.primary,
+
+
+                            )
+
+                        OutlinedTextField(
+                            value = email,
+                            onValueChange = {
+                                email = it
+                                emailError = validateEmail(email) // validación en tiempo real
+                            },
+                            label = { Text("Usuario") },
+                            singleLine = true,
+                            modifier = Modifier.padding(3.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                                cursorColor = MaterialTheme.colorScheme.primary,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface
+                            )
                         )
 
-                        Spacer(modifier = Modifier.width(4.dp)) // espacio entre Text y TextButton
+                        if (emailError != null) {
+                            Text(
+                                text = emailError!!,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                            )
+                        }
 
-                        TextButton(
-                            onClick = { /* acción */ },
-                            contentPadding = PaddingValues(0.dp) // elimina padding interno si quieres que quede pegado al texto
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        OutlinedTextField(
+                            value = password,
+                            onValueChange = {
+                                password = it
+                                passwordError = validatePassword(password)
+                            },
+                            label = { Text("Contraseña") },
+                            singleLine = true,
+                            visualTransformation = PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            modifier = Modifier.padding(3.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                                cursorColor = MaterialTheme.colorScheme.primary,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface
+                            )
+                        )
+
+                        if (passwordError != null) {
+                            Text(
+                                text = passwordError!!,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                            )
+                        }
+
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Button(
+                            onClick = {
+
+                                val errors = validateLogin(email, password)
+                                emailError = errors.emailError
+                                passwordError = errors.passwordError
+
+                                if (errors.emailError == null && errors.passwordError == null) {
+
+                                }
+                            },
+                            modifier = Modifier.padding(6.dp)
+                        ) {
+                            Text("Entrar")
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Regístrate",
+                                text = "¿No tienes una cuenta?",
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.secondary
                             )
+
+                            Spacer(modifier = Modifier.width(4.dp)) // espacio entre Text y TextButton
+
+                            TextButton(
+                                onClick = { /* acción */ },
+                                contentPadding = PaddingValues(0.dp) // elimina padding interno si quieres que quede pegado al texto
+                            ) {
+                                Text(
+                                    text = "Regístrate",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
                 }

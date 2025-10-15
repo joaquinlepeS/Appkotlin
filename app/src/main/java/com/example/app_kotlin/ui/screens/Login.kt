@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,28 +18,44 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import com.example.app_kotlin.utils.validateEmail
+import com.example.app_kotlin.utils.validateLogin
+import com.example.app_kotlin.utils.validatePassword
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.draw.clip
 
 
 @Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen() {
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-
-    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    // Estados de errores
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Inicio", color = MaterialTheme.colorScheme.onPrimary) },
+                title = {
+                    Text(
+                        "Bienvenido a tu app",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary)
-            )
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                modifier = Modifier.clip(RoundedCornerShape(bottomStart = 6.dp, bottomEnd = 16.dp)),
+
+                )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { innerPadding ->
+
+        ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -46,75 +63,138 @@ fun LoginScreen() {
                 .padding(32.dp)
                 .background(MaterialTheme.colorScheme.inverseOnSurface)
                 .border(
-                    width = 2.dp, shape = CircleShape,
-                    brush = Brush.linearGradient()
+                    width = 1.dp, shape = RoundedCornerShape(16.dp),
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.secondary
+                        )
+
+                    )
                 ),
 
             contentAlignment = Alignment.Center,
 
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = "Iniciar Sesión",
-                    fontSize = 26.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 24.dp),
-                    color = MaterialTheme.colorScheme.primary
+            Card(
+                colors = CardDefaults.cardColors(MaterialTheme.colorScheme.background)
 
-
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 )
+                {
+                    Text(
+                        text = "Inicia Sesion",
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical =  24.dp),
+                        color = MaterialTheme.colorScheme.primary,
 
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    label = { Text("Usuario") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface
+
+                        )
+
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = {
+                            email = it
+                            emailError = validateEmail(email) // validación en tiempo real
+                        },
+                        label = { Text("Usuario") },
+                        singleLine = true,
+                        modifier = Modifier.padding(3.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                            cursorColor = MaterialTheme.colorScheme.primary,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface
+                        )
                     )
 
-                )
+                    if (emailError != null) {
+                        Text(
+                            text = emailError!!,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                        )
+                    }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text("Contraseña") },
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface
-                )
-                )
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = {
+                            password = it
+                            passwordError = validatePassword(password)
+                        },
+                        label = { Text("Contraseña") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        modifier = Modifier.padding(3.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                            cursorColor = MaterialTheme.colorScheme.primary,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    if (passwordError != null) {
+                        Text(
+                            text = passwordError!!,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                        )
+                    }
 
-                Button(
-                    onClick = {
-                        scope.launch {
-                            if (username == "admin" && password == "1234") {
-                                snackbarHostState.showSnackbar("Inicio de sesión exitoso ✅")
-                            } else {
-                                snackbarHostState.showSnackbar("Usuario o contraseña incorrectos ❌")
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = {
+
+                            val errors = validateLogin(email, password)
+                            emailError = errors.emailError
+                            passwordError = errors.passwordError
+
+                            if (errors.emailError == null && errors.passwordError == null) {
+
                             }
+                        },
+                        modifier = Modifier.padding(6.dp)
+                    ) {
+                        Text("Entrar")
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "¿No tienes una cuenta?",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+
+                        Spacer(modifier = Modifier.width(4.dp)) // espacio entre Text y TextButton
+
+                        TextButton(
+                            onClick = { /* acción */ },
+                            contentPadding = PaddingValues(0.dp) // elimina padding interno si quieres que quede pegado al texto
+                        ) {
+                            Text(
+                                text = "Regístrate",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
                         }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Entrar")
+                    }
                 }
             }
         }

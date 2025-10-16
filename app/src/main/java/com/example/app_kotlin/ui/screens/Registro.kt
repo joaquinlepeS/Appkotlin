@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -82,7 +83,7 @@ fun RegistroScreen(onNavigateToLogin: () -> Unit ){
     var registroExitoso by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Imagen de fondo
+
         Image(
             painter = painterResource(id = R.drawable.wallpaper ),
             contentDescription = null,
@@ -96,18 +97,29 @@ fun RegistroScreen(onNavigateToLogin: () -> Unit ){
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(
-                            "Bienvenido a ConsultaMed",
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            Image(
+                                painter = painterResource(id = R.drawable.baseline_medical_services_24),
+                                contentDescription = "Logo",
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .padding(end = 8.dp) // espacio entre imagen y texto
+                            )
+
+                            Text(
+                                text = "ConsultaMed",
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    modifier = Modifier.clip(RoundedCornerShape(bottomStart = 6.dp, bottomEnd = 16.dp)),
-
+                        containerColor = MaterialTheme.colorScheme.primary
                     )
+                )
             },
 
             ) { innerPadding ->
@@ -300,7 +312,7 @@ fun RegistroScreen(onNavigateToLogin: () -> Unit ){
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.3f))
-                    .zIndex(1f), // asegura que esté sobre todo
+                    .zIndex(1f),
                 contentAlignment = Alignment.Center
             ) {
                 Card(

@@ -44,15 +44,13 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit) {
     var passwordError by remember { mutableStateOf<String?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Imagen de fondo
+
         Image(
             painter = painterResource(id = R.drawable.wallpaper ),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
-
-
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
@@ -61,7 +59,7 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Imagen a la izquierda
+
                             Image(
                                 painter = painterResource(id = R.drawable.baseline_medical_services_24),
                                 contentDescription = "Logo",
@@ -70,7 +68,6 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit) {
                                     .padding(end = 8.dp) // espacio entre imagen y texto
                             )
 
-                            // Texto del título
                             Text(
                                 text = "ConsultaMed",
                                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
@@ -82,7 +79,6 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit) {
                         containerColor = MaterialTheme.colorScheme.primary
                     )
                 )
-
             },
 
             ) { innerPadding ->

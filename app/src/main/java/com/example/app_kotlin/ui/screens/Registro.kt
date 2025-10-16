@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -50,11 +52,15 @@ import com.example.app_kotlin.R
 import com.example.app_kotlin.utils.validateEmail
 import com.example.app_kotlin.utils.validateLogin
 import com.example.app_kotlin.utils.validatePassword
+import com.example.app_kotlin.utils.validateRegistro
+import com.example.app_kotlin.utils.validateUsuario
+import com.example.app_kotlin.utils.validateRepetirPassword
 
-@Preview
+
+
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun RegistroScreen( ){
+fun RegistroScreen(onNavigateToLogin: () -> Unit ){
 
     var usuario by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -62,8 +68,10 @@ fun RegistroScreen( ){
     var password2 by remember { mutableStateOf("") }
 
     // Estados de errores
+    var usuarioError by remember { mutableStateOf<String?>(null) }
     var emailError by remember { mutableStateOf<String?>(null) }
-    var passwordError by remember { mutableStateOf<String?>(null) }
+    var password1Error by remember { mutableStateOf<String?>(null) }
+    var password2Error by remember { mutableStateOf<String?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Imagen de fondo
@@ -107,13 +115,16 @@ fun RegistroScreen( ){
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.onSurfaceVariant),
                     border = BorderStroke(2.dp, Color.Transparent), // grosor y color del borde
                     elevation = CardDefaults.cardElevation(40.dp),
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding( 24.dp)
+
+
 
 
                     ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(24.dp)
                     )
                     {
                         Text(
@@ -129,7 +140,7 @@ fun RegistroScreen( ){
                             value = usuario,
                             onValueChange = {
                                 usuario = it
-                                emailError = validateEmail(email) // validación en tiempo real
+                                usuarioError = validateUsuario(usuario) // validación en tiempo real
                             },
                             label = { Text("Usuario") },
                             singleLine = true,
@@ -142,6 +153,15 @@ fun RegistroScreen( ){
                                 focusedLabelColor = MaterialTheme.colorScheme.primaryContainer
                             )
                         )
+
+                        if (usuarioError != null) {
+                            Text(
+                                text = usuarioError!!,
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(20.dp))
 
@@ -178,7 +198,7 @@ fun RegistroScreen( ){
                             value = password1,
                             onValueChange = {
                                 password1 = it
-                                passwordError = validatePassword(password1)
+                                password1Error = validatePassword(password1)
                             },
                             label = { Text("Ingrese Contraseña") },
                             singleLine = true,
@@ -195,9 +215,9 @@ fun RegistroScreen( ){
                             )
                         )
 
-                        if (passwordError != null) {
+                        if (password1Error != null) {
                             Text(
-                                text = passwordError!!,
+                                text = password1Error!!,
                                 color = MaterialTheme.colorScheme.primaryContainer,
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.padding(start = 16.dp, top = 4.dp)
@@ -207,10 +227,10 @@ fun RegistroScreen( ){
                         Spacer(modifier = Modifier.height(20.dp))
 
                         OutlinedTextField(
-                            value = password1,
+                            value = password2,
                             onValueChange = {
-                                password1 = it
-                                passwordError = validatePassword(password1)
+                                password2 = it
+                                password2Error = validateRepetirPassword(password1,password2)
                             },
                             label = { Text("Repita Contraseña") },
                             singleLine = true,
@@ -227,18 +247,30 @@ fun RegistroScreen( ){
                             )
                         )
 
+                        if (password2Error != null) {
+                            Text(
+                                text = password2Error!!,
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                            )
+                        }
+
 
                         Spacer(modifier = Modifier.height(24.dp))
 
                         Button(
                             onClick = {
 
-                                val errors = validateLogin(email, password1)
+                                val errors = validateRegistro(usuario,email, password1,password2)
+                                usuarioError=errors.usuarioError
                                 emailError = errors.emailError
-                                passwordError = errors.passwordError
+                                password1Error = errors.password1Error
+                                password2Error= errors.password2Error
 
-                                if (errors.emailError == null && errors.passwordError == null) {
-
+                                if (errors.emailError == null && errors.password1Error == null
+                                    && errors.password2Error == null && errors.usuarioError == null) {
+                                    onNavigateToLogin()
                                 }
                             },
                             modifier = Modifier.padding(6.dp),
@@ -247,32 +279,6 @@ fun RegistroScreen( ){
                             Text("Entrar",
                                 color = MaterialTheme.colorScheme.onSurface )
                         }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "¿No tienes una cuenta?",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-
-                            Spacer(modifier = Modifier.width(4.dp)) // espacio entre Text y TextButton
-
-                            TextButton(
-                                onClick = {},
-                                contentPadding = PaddingValues(0.dp) // elimina padding interno si quieres que quede pegado al texto
-                            ) {
-                                Text(
-                                    text = "Regístrate",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primaryContainer
-                                )
-                            }
-                        }
                     }
                 }
             }
@@ -280,3 +286,8 @@ fun RegistroScreen( ){
     }
 }
 
+@Preview
+@Composable
+fun previewlogin(){
+    RegistroScreen {  }
+}

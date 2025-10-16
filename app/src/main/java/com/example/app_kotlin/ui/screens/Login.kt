@@ -30,7 +30,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.example.app_kotlin.R
 
-@Preview
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen( onNavigateToRegistro: () -> Unit) {
@@ -170,9 +170,9 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit) {
 
                                 val errors = validateLogin(email, password)
                                 emailError = errors.emailError
-                                passwordError = errors.passwordError
+                                passwordError = errors.password1Error
 
-                                if (errors.emailError == null && errors.passwordError == null) {
+                                if (errors.emailError == null && errors.password1Error == null) {
 
                                 }
                             },

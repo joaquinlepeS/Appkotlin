@@ -25,6 +25,7 @@ import com.example.app_kotlin.utils.validateLogin
 import com.example.app_kotlin.utils.validatePassword
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -57,18 +58,31 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit) {
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(
-                            "Bienvenido a tu app",
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Imagen a la izquierda
+                            Image(
+                                painter = painterResource(id = R.drawable.baseline_medical_services_24),
+                                contentDescription = "Logo",
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .padding(end = 8.dp) // espacio entre imagen y texto
+                            )
+
+                            // Texto del título
+                            Text(
+                                text = "ConsultaMed",
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    modifier = Modifier.clip(RoundedCornerShape(bottomStart = 6.dp, bottomEnd = 16.dp)),
-
+                        containerColor = MaterialTheme.colorScheme.primary
                     )
+                )
+
             },
 
             ) { innerPadding ->
@@ -179,7 +193,7 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit) {
                             modifier = Modifier.padding(6.dp),
                             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primaryContainer)
                         ) {
-                            Text("Entrar",
+                            Text("Ingresar",
                                 color = MaterialTheme.colorScheme.onSurface )
                         }
                         Row(

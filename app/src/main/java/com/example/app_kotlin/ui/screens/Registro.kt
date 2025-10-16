@@ -1,5 +1,10 @@
 package com.example.app_kotlin.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -48,6 +53,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.example.app_kotlin.R
 import com.example.app_kotlin.utils.validateEmail
 import com.example.app_kotlin.utils.validateLogin
@@ -73,6 +79,8 @@ fun RegistroScreen(onNavigateToLogin: () -> Unit ){
     var password1Error by remember { mutableStateOf<String?>(null) }
     var password2Error by remember { mutableStateOf<String?>(null) }
 
+    var registroExitoso by remember { mutableStateOf(false) }
+
     Box(modifier = Modifier.fillMaxSize()) {
         // Imagen de fondo
         Image(
@@ -89,7 +97,7 @@ fun RegistroScreen(onNavigateToLogin: () -> Unit ){
                 TopAppBar(
                     title = {
                         Text(
-                            "Bienvenido a tu app",
+                            "Bienvenido a ConsultaMed",
                             color = MaterialTheme.colorScheme.onPrimary,
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                         )
@@ -263,21 +271,67 @@ fun RegistroScreen(onNavigateToLogin: () -> Unit ){
                             onClick = {
 
                                 val errors = validateRegistro(usuario,email, password1,password2)
-                                usuarioError=errors.usuarioError
+                                usuarioError = errors.usuarioError
                                 emailError = errors.emailError
                                 password1Error = errors.password1Error
                                 password2Error= errors.password2Error
 
                                 if (errors.emailError == null && errors.password1Error == null
                                     && errors.password2Error == null && errors.usuarioError == null) {
-                                    onNavigateToLogin()
+                                    registroExitoso = true
                                 }
                             },
                             modifier = Modifier.padding(6.dp),
                             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primaryContainer)
                         ) {
-                            Text("Entrar",
+                            Text("Registrarse",
                                 color = MaterialTheme.colorScheme.onSurface )
+                        }
+                    }
+                }
+            }
+        }
+        AnimatedVisibility(
+            visible = registroExitoso,
+            enter = fadeIn() + scaleIn(initialScale = 0.8f),
+            exit = fadeOut() + scaleOut(targetScale = 0.8f)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.3f))
+                    .zIndex(1f), // asegura que esté sobre todo
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(24.dp),
+                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.onSurface),
+                    modifier = Modifier
+                        .wrapContentHeight()
+                        .padding(24.dp)
+                        .zIndex(2f)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "¡Registro exitoso!",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimary  // verde elegante
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Button(onClick = {
+                            registroExitoso = false
+                            onNavigateToLogin()
+                        },
+                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
+                        ) {
+                            Text("Aceptar")
                         }
                     }
                 }

@@ -3,5 +3,5 @@ package com.example.app_kotlin.navigation
 object Screens {
     const val LOGIN = "login"
     const val REGISTER = "registro"
-    const val NOTES = "notas"
+    const val CONSULTACLIENTE = "consultacliente"
 }

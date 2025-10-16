@@ -34,7 +34,7 @@ import com.example.app_kotlin.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen( onNavigateToRegistro: () -> Unit) {
+fun LoginScreen( onNavigateToRegistro: () -> Unit,onNavigateToConsultaCliente: () -> Unit) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -183,7 +183,7 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit) {
                                 passwordError = errors.password1Error
 
                                 if (errors.emailError == null && errors.password1Error == null) {
-
+                                    onNavigateToConsultaCliente()
                                 }
                             },
                             modifier = Modifier.padding(6.dp),

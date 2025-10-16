@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.app_kotlin.ui.screens.ConsultaClienteScreen
 import com.example.app_kotlin.ui.screens.LoginScreen
 import com.example.app_kotlin.ui.screens.RegistroScreen
 
@@ -17,11 +18,16 @@ fun AppNavHost() {
         composable(Screens.LOGIN) {
             LoginScreen(
                 onNavigateToRegistro = { navController.navigate(Screens.REGISTER) },
+                onNavigateToConsultaCliente = {navController.navigate(Screens.CONSULTACLIENTE)}
 
             )
         }
         composable(Screens.REGISTER) {
             RegistroScreen(onNavigateToLogin = { navController.navigate(Screens.LOGIN) })
+        }
+
+        composable(Screens.CONSULTACLIENTE){
+            ConsultaClienteScreen()
         }
 
     }

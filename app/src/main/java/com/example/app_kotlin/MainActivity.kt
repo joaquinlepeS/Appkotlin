@@ -35,6 +35,8 @@ class MainActivity : ComponentActivity() {
                     // Cargar datos al iniciar
                     LaunchedEffect (Unit) {
                         appState.cargarDatos()
+                        println("✅ Datos cargados en memoria")
+
                     }
 
                     // Pasar appState al NavHost

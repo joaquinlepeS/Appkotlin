@@ -195,7 +195,7 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit,onNavigateToConsultaCliente: (
 
                                         val loginExitoso = when {
                                             esUsuario -> appState.loginUser(email, password)
-                                            esDoctor -> appState.loginDoctor("", "", email, password)
+                                            esDoctor -> appState.loginDoctor( email, password)
                                             else -> false
                                         }
 

@@ -295,14 +295,14 @@ fun RegistroScreen(onNavigateToLogin: () -> Unit, appState: AppState ){
                                     // Determinar tipo de cuenta
                                     val registroOk = when {
                                         email.endsWith("@user.com", ignoreCase = true) -> {
-                                            appState.registrarUsuario(email, password1,usuario = usuario)
+                                            appState.registrarUsuario( email,password1,usuario)
                                         }
                                         email.endsWith("@doc.com", ignoreCase = true) -> {
                                             appState.registrarDoctor(
-                                                 // se usa el campo usuario como nombre del doctor
-                                                email_doc = email,
-                                                password_doc = password1,
-                                                usuario = usuario
+
+                                                email,
+                                                password1,
+                                                usuario
                                             )
                                             true
                                         }

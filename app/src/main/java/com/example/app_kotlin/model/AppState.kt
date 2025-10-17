@@ -14,20 +14,23 @@ data class Usuario(val email_user: String, val password_user: String, val nombre
 data class Doctor(val email_doc: String, val password_doc: String, val nombre: String)
 
 
-class AppState(private  val dataStore: DataStoreManager){
+
+class AppState(private val dataStore: DataStoreManager) {
+
     val usuarios = mutableStateListOf<Usuario>()
     val doctores = mutableStateListOf<Doctor>()
+    val consultasPorUsuario = mutableStateMapOf<String, SnapshotStateList<String>>()
+
     var usuarioActual: Usuario? = null
     var doctorActual: Doctor? = null
-    val consultasPorUsuario = mutableStateMapOf<String, SnapshotStateList<String>>()
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    //Carga de datos iniciales
+    // cargar datos persistidos
     suspend fun cargarDatos() {
         val users = dataStore.getUsers().first()
-        val consultas = dataStore.getNotes().first()
         val docs = dataStore.getDoctores().first()
+        val consultas = dataStore.getNotes().first()
 
         usuarios.clear()
         usuarios.addAll(users)
@@ -36,84 +39,61 @@ class AppState(private  val dataStore: DataStoreManager){
         doctores.addAll(docs)
 
         consultasPorUsuario.clear()
-        consultas.forEach { (k, v) ->
-            consultasPorUsuario[k] = v.toMutableStateList()
+        consultas.forEach { (key, value) ->
+            consultasPorUsuario[key] = value.toMutableStateList()
         }
     }
 
-
-    //Registro de usuario
-    fun registrarUsuario(email: String, password: String,usuario: String): Boolean{
-        if (usuarios.any{ it.email_user == email }) return false
-        val nuevo = Usuario(email, password,usuario)
+    // registrar usuario
+    fun registrarUsuario(nombre: String, email: String, password: String): Boolean {
+        if (usuarios.any { it.email_user == email }) return false
+        val nuevo = Usuario(nombre, email, password)
         usuarios.add(nuevo)
-        guardarUsuarios()
+        scope.launch { dataStore.saveUsers(usuarios) }
         return true
     }
 
-    fun registrarDoctor( email_doc: String, password_doc: String,usuario:String):Boolean {
-        if(doctores.any{ it.email_doc == email_doc}) return false
-        val nuevo = Doctor(email_doc=email_doc,password_doc=password_doc,usuario)
+    // registrar doctor
+    fun registrarDoctor(nombre: String, email: String, password: String): Boolean {
+        if (doctores.any { it.email_doc == email }) return false
+        val nuevo = Doctor(nombre, email, password)
         doctores.add(nuevo)
-        guardarDoctores()
+        scope.launch { dataStore.saveDoctores(doctores) }
         return true
     }
 
-    //G
-    fun agregarConsultas(consulta: String){
-        val email = usuarioActual?.email_user ?: return
-        val consultas = consultasPorUsuario.getOrPut(email){ mutableStateListOf()}
-        consultas.add(consulta)
-        guardarNotas()
-    }
-
-    //login
-    fun loginUser(email: String,password: String) : Boolean{
+    // login usuario
+    fun loginUser(email: String, password: String): Boolean {
         val user = usuarios.find { it.email_user == email && it.password_user == password }
-        return if(user != null){
+        return if (user != null) {
             usuarioActual = user
             true
-        }else false
+        } else false
     }
 
-    fun loginDoctor(nombre: String, rut:String, email_doc: String, password_doc: String):Boolean{
-        val doc = doctores.find { it.email_doc == email_doc && it.password_doc == password_doc }
-        return if(doc != null){
+    // login doctor
+    fun loginDoctor(email: String, password: String): Boolean {
+        val doc = doctores.find { it.email_doc == email && it.password_doc == password }
+        return if (doc != null) {
             doctorActual = doc
             true
-        }else false
+        } else false
     }
 
-    //logout
-    fun logout(){
+    fun logout() {
         usuarioActual = null
         doctorActual = null
     }
 
-    //obtener notas del usuario logeado
-    fun obtenerConsultas(): List<String>{
+    fun agregarConsultas(consulta: String) {
+        val email = usuarioActual?.email_user ?: return
+        val consultas = consultasPorUsuario.getOrPut(email) { mutableStateListOf() }
+        consultas.add(consulta)
+        scope.launch { dataStore.saveNotes(consultasPorUsuario) }
+    }
+
+    fun obtenerConsultas(): List<String> {
         val email = usuarioActual?.email_user ?: return emptyList()
         return consultasPorUsuario[email] ?: mutableStateListOf()
-    }
-
-
-
-    //Guardar en DataStore
-    private fun guardarUsuarios(){
-        scope.launch {
-            dataStore.saveUsers(usuarios)
-        }
-    }
-
-    private fun guardarNotas(){
-        scope.launch {
-            dataStore.saveNotes(consultasPorUsuario)
-        }
-    }
-
-    private  fun guardarDoctores(){
-        scope.launch {
-            dataStore.saveDoctores(doctores)
-        }
     }
 }

@@ -110,8 +110,10 @@ fun AgendaScreen(
                         fecha = fecha,
                         hora = hora,
                         especialidad = especialidad,
-                        doctor = doctorSeleccionado
+                        doctor = doctorSeleccionado,
+                        paciente = appState.usuarioActual?.nombre ?: "Desconocido"
                     )
+
                     appState.agregarConsulta(nuevaConsulta)
                     onNavigateToConsultaCliente()
                 }

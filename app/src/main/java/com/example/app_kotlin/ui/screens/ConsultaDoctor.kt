@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.app_kotlin.R
 import com.example.app_kotlin.model.AppState
+import com.example.app_kotlin.model.Consulta
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -125,7 +127,7 @@ fun ConsultaDoctorScreen(
                             )
 
                             val doctorId = appState.doctorActual?.email_doc ?: ""
-                            val consultas = appState.consultasPorDoctor[doctorId] ?: emptyList()
+                            val consultas: List<Consulta> = appState.consultasPorDoctor[doctorId]?.toList() ?: emptyList()
 
                             if (consultas.isEmpty()) {
                                 Text(
@@ -139,8 +141,7 @@ fun ConsultaDoctorScreen(
                                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                                     contentPadding = PaddingValues(horizontal = 16.dp)
                                 ) {
-                                    items(consultas.size) { idx ->
-                                        val consulta = consultas[idx]
+                                    items(consultas) { consulta ->
                                         Card(
                                             modifier = Modifier
                                                 .width(220.dp)
@@ -177,7 +178,7 @@ fun ConsultaDoctorScreen(
                                                     color = MaterialTheme.colorScheme.onSecondaryContainer
                                                 )
                                                 Text(
-                                                    text = "Paciente: ${consulta.doctor}",
+                                                    text = "Paciente: ${consulta.paciente ?: "Desconocido"}",
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     color = MaterialTheme.colorScheme.onSecondaryContainer
                                                 )

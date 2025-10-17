@@ -13,8 +13,14 @@ import kotlinx.coroutines.launch
 data class Usuario(val email_user: String, val password_user: String, val nombre: String)
 data class Doctor(val email_doc: String, val password_doc: String, val nombre: String)
 
-data class Consulta(val id: Int,val fecha: String, val hora: String,val especialidad: String,val doctor: String)
-
+data class Consulta(
+    val id: Int,
+    val fecha: String,
+    val hora: String,
+    val especialidad: String,
+    val doctor: String,
+    val paciente: String // email o nombre del usuario que agenda
+)
 
 
 class AppState(private val dataStore: DataStoreManager) {
@@ -97,40 +103,33 @@ class AppState(private val dataStore: DataStoreManager) {
     }
 
     fun agregarConsulta(consulta: Consulta) {
-        val email = usuarioActual?.email_user ?: return
+        val emailUsuario = usuarioActual?.email_user ?: return
 
-        val lista = consultasPorUsuario.getOrPut(email) { mutableStateListOf() }
+        val listaUsuario = consultasPorUsuario.getOrPut(emailUsuario) { mutableStateListOf() }
+        val nextIdUsuario = if (listaUsuario.isEmpty()) 1 else (listaUsuario.maxOf { it.id } + 1)
 
-        // Calcular el siguiente ID para este usuario
-        val nextId = if (lista.isEmpty()) 1 else (lista.maxOf { it.id } + 1)
+        // Crear consulta con ID y paciente
+        val nuevaConsulta = consulta.copy(
+            id = nextIdUsuario,
+            paciente = usuarioActual!!.nombre
+        )
 
-        // Crear nueva consulta con ID autoincrementado
-        val nuevaConsulta = consulta.copy(id = nextId)
-
-        // Agregarla a la lista
-        lista.add(nuevaConsulta)
-
-        // Guardar persistencia
+        // Guardar para el usuario
+        listaUsuario.add(nuevaConsulta)
         scope.launch { dataStore.saveConsulta(consultasPorUsuario) }
+
+        // Guardar para el doctor
+        val doctorEmail = doctores.find { it.nombre == consulta.doctor }?.email_doc ?: return
+        val listaDoctor = consultasPorDoctor.getOrPut(doctorEmail) { mutableStateListOf() }
+        val nextIdDoctor = if (listaDoctor.isEmpty()) 1 else (listaDoctor.maxOf { it.id } + 1)
+        listaDoctor.add(nuevaConsulta)
+        scope.launch { dataStore.saveConsultasPorDoctor(consultasPorDoctor) }
     }
+
 
     fun obtenerConsultas(): List<Consulta> {
         val email = usuarioActual?.email_user ?: return emptyList()
         return consultasPorUsuario[email] ?: emptyList()
     }
 
-    fun agregarConsultaDoctor(consulta: Consulta) {
-        val doctor = doctorActual ?: return
-        val doctorId = doctor.email_doc // o usa un id único si lo defines
-        val lista = consultasPorDoctor.getOrPut(doctorId) { mutableStateListOf() }
-
-        // ID autoincremental por doctor
-        val nextId = if (lista.isEmpty()) 1 else (lista.maxOf { it.id } + 1)
-        val nuevaConsulta = consulta.copy(id = nextId)
-
-        lista.add(nuevaConsulta)
-
-        // Guardar persistencia
-        scope.launch { dataStore.saveConsultasPorDoctor(consultasPorDoctor) }
-    }
 }

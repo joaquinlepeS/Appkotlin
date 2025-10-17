@@ -202,7 +202,7 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit,onNavigateToConsultaCliente: (
 
                                         if (loginExitoso) {
                                             val esUsuario = email.endsWith("@user.com")
-                                            val esDoctor = email.endsWith("@doc.com")
+
                                             if(esUsuario) {
                                                     onNavigateToConsultaCliente()
                                                 }else{

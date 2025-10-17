@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 data class Usuario(val email_user: String, val password_user: String, val nombre: String)
 data class Doctor(val email_doc: String, val password_doc: String, val nombre: String)
 
-
+data class Consulta(val id: Int,val fecha: String,val hora: String,val especialidad: String,val doctor: String)
 
 
 
@@ -21,7 +21,8 @@ class AppState(private val dataStore: DataStoreManager) {
 
     val usuarios = mutableStateListOf<Usuario>()
     val doctores = mutableStateListOf<Doctor>()
-    val consultasPorUsuario = mutableStateMapOf<String, SnapshotStateList<String>>()
+
+    val consultasPorUsuario = mutableStateMapOf<String, SnapshotStateList<Consulta>>()
 
     var usuarioActual: Usuario? = null
     var doctorActual: Doctor? = null
@@ -32,7 +33,7 @@ class AppState(private val dataStore: DataStoreManager) {
     suspend fun cargarDatos() {
         val users = dataStore.getUsers().first()
         val docs = dataStore.getDoctores().first()
-        val consultas = dataStore.getNotes().first()
+        val consultas = dataStore.getConsulta().first()
 
         usuarios.clear()
         usuarios.addAll(users)
@@ -87,15 +88,26 @@ class AppState(private val dataStore: DataStoreManager) {
         doctorActual = null
     }
 
-    fun agregarConsultas(consulta: String) {
+    fun agregarConsulta(consulta: Consulta) {
         val email = usuarioActual?.email_user ?: return
-        val consultas = consultasPorUsuario.getOrPut(email) { mutableStateListOf() }
-        consultas.add(consulta)
-        scope.launch { dataStore.saveNotes(consultasPorUsuario) }
+
+        val lista = consultasPorUsuario.getOrPut(email) { mutableStateListOf() }
+
+        // Calcular el siguiente ID para este usuario
+        val nextId = if (lista.isEmpty()) 1 else (lista.maxOf { it.id } + 1)
+
+        // Crear nueva consulta con ID autoincrementado
+        val nuevaConsulta = consulta.copy(id = nextId)
+
+        // Agregarla a la lista
+        lista.add(nuevaConsulta)
+
+        // Guardar persistencia
+        scope.launch { dataStore.saveConsulta(consultasPorUsuario) }
     }
 
-    fun obtenerConsultas(): List<String> {
+    fun obtenerConsultas(): List<Consulta> {
         val email = usuarioActual?.email_user ?: return emptyList()
-        return consultasPorUsuario[email] ?: mutableStateListOf()
+        return consultasPorUsuario[email] ?: emptyList()
     }
 }

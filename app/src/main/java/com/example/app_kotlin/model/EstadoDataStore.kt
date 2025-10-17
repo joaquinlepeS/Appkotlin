@@ -1,6 +1,8 @@
 package com.example.app_kotlin.model
 
 import android.content.Context
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -36,19 +38,17 @@ class DataStoreManager(private val context: Context){
         }
     }
 
-    suspend fun saveNotes(notes: Map<String, List<String>>){
-        val json = gson.toJson(notes)
+    suspend fun saveConsulta(consultas: Map<String, List<Consulta>>) {
+        val json = gson.toJson(consultas)
         context.dataStore.edit { prefs ->
             prefs[CONSULTAS_KEY] = json
         }
     }
 
-    fun getNotes(): Flow<Map<String, List<String>>>{
-        return context.dataStore.data.map { prefs ->
-            val json = prefs[CONSULTAS_KEY] ?: "{}"
-            val type = object : TypeToken<Map<String, List<String>>>() {}.type
-            gson.fromJson(json,type)
-        }
+    fun getConsulta(): Flow<Map<String, List<Consulta>>> = context.dataStore.data.map { prefs ->
+        val json = prefs[CONSULTAS_KEY] ?: "{}"
+        val type = object : TypeToken<Map<String, List<Consulta>>>() {}.type
+        gson.fromJson<Map<String, List<Consulta>>>(json, type) ?: emptyMap()
     }
 
     suspend fun saveDoctores(users: List<Doctor>){
@@ -65,5 +65,7 @@ class DataStoreManager(private val context: Context){
             gson.fromJson(json,type)
         }
     }
+
+
 
 }

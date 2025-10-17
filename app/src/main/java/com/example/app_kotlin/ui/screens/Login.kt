@@ -200,6 +200,7 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit,onNavigateToConsultaCliente: (
                                         }
 
                                         if (loginExitoso) {
+                                            
                                             onNavigateToConsultaCliente()
                                         } else {
                                             loginError = "Correo o contraseña incorrectos"

@@ -42,7 +42,8 @@ fun AppNavHost(appState: AppState) {
         }
 
         composable(Screens.AGENDA)  {
-            AgendaScreen(onNavigateToConsultaCliente = {navController.navigate(Screens.CONSULTACLIENTE)})
+            AgendaScreen(onNavigateToConsultaCliente = {navController.navigate(Screens.CONSULTACLIENTE)},
+                appState = appState)
         }
 
     }

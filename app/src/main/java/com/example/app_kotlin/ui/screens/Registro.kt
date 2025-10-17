@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.example.app_kotlin.R
+import com.example.app_kotlin.model.AppState
 import com.example.app_kotlin.utils.validateEmail
 import com.example.app_kotlin.utils.validateLogin
 import com.example.app_kotlin.utils.validatePassword
@@ -67,7 +68,7 @@ import com.example.app_kotlin.utils.validateRepetirPassword
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun RegistroScreen(onNavigateToLogin: () -> Unit ){
+fun RegistroScreen(onNavigateToLogin: () -> Unit, appState: AppState ){
 
     var usuario by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -282,22 +283,46 @@ fun RegistroScreen(onNavigateToLogin: () -> Unit ){
                         Button(
                             onClick = {
 
-                                val errors = validateRegistro(usuario,email, password1,password2)
+                                val errors = validateRegistro(usuario, email, password1, password2)
                                 usuarioError = errors.usuarioError
                                 emailError = errors.emailError
                                 password1Error = errors.password1Error
-                                password2Error= errors.password2Error
+                                password2Error = errors.password2Error
 
                                 if (errors.emailError == null && errors.password1Error == null
                                     && errors.password2Error == null && errors.usuarioError == null) {
-                                    registroExitoso = true
+
+                                    // Determinar tipo de cuenta
+                                    val registroOk = when {
+                                        email.endsWith("@user.com", ignoreCase = true) -> {
+                                            appState.registrarUsuario(email, password1,usuario = usuario)
+                                        }
+                                        email.endsWith("@doc.com", ignoreCase = true) -> {
+                                            appState.registrarDoctor(
+                                                 // se usa el campo usuario como nombre del doctor
+                                                email_doc = email,
+                                                password_doc = password1,
+                                                usuario = usuario
+                                            )
+                                            true
+                                        }
+                                        else -> {
+                                            emailError = "El email debe terminar en @user.com o @doc.com"
+                                            false
+                                        }
+                                    }
+
+                                    if (registroOk) {
+                                        registroExitoso = true
+                                    } else if (emailError == null) {
+                                        emailError = "El correo ya está registrado."
+                                    }
                                 }
                             },
                             modifier = Modifier.padding(6.dp),
                             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primaryContainer)
                         ) {
-                            Text("Registrarse",
-                                color = MaterialTheme.colorScheme.onSurface )
+                            Text("Registrarse", color = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                 }
@@ -352,8 +377,3 @@ fun RegistroScreen(onNavigateToLogin: () -> Unit ){
     }
 }
 
-@Preview
-@Composable
-fun previewlogin(){
-    RegistroScreen {  }
-}

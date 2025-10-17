@@ -15,10 +15,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.app_kotlin.R
-
+import com.example.app_kotlin.model.AppState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConsultaClienteScreen(onNavigateToAgendaScreen: () -> Unit) {
+fun ConsultaClienteScreen(onNavigateToAgendaScreen: () -> Unit,onNavigateToLoginScreen: () -> Unit,appState: AppState) {
     Box(modifier = Modifier.fillMaxSize()) {
 
         // 🌄 Fondo con imagen
@@ -50,14 +50,31 @@ fun ConsultaClienteScreen(onNavigateToAgendaScreen: () -> Unit) {
                 TopAppBar(
                     title = {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start,
+                            modifier = Modifier.fillMaxWidth()
                         ) {
+                            // Botón Cerrar sesión
+                            TextButton(
+                                onClick = {
+                                    appState.logout()   // llama a tu función logout
+                                    onNavigateToLoginScreen()
+                                }
+                            ) {
+                                Text(
+                                    text = "Cerrar sesión",
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(16.dp))
+
+                            // Logo + texto
                             Image(
                                 painter = painterResource(id = R.drawable.baseline_medical_services_24),
                                 contentDescription = "Logo",
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .padding(end = 8.dp)
+                                modifier = Modifier.size(32.dp)
                             )
                             Text(
                                 text = "ConsultaMed",
@@ -183,8 +200,3 @@ fun ConsultaClienteScreen(onNavigateToAgendaScreen: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewConsultaClienteScreen() {
-    ConsultaClienteScreen()
-}

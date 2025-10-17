@@ -1,16 +1,18 @@
-package com.myapplication.data
+package com.example.app_kotlin.model
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
+import com.example.app_kotlin.model.DataStoreManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-data class Usuario(val email_user: String, val password_user: String)
-data class Doctor(val nombre: String,val rut:String,val email_doc: String,val password_doc: String)
+data class Usuario(val email_user: String, val password_user: String, val nombre: String)
+data class Doctor(val email_doc: String, val password_doc: String, val nombre: String)
+
 
 class AppState(private  val dataStore: DataStoreManager){
     val usuarios = mutableStateListOf<Usuario>()
@@ -22,39 +24,39 @@ class AppState(private  val dataStore: DataStoreManager){
     private val scope = CoroutineScope(Dispatchers.IO)
 
     //Carga de datos iniciales
-    fun cargarDatos(){
-        scope.launch {
-            val users = dataStore.getUsers().first()
-            val consultas = dataStore.getNotes().first()
-            val docs= dataStore.getDoctores().first()
+    suspend fun cargarDatos() {
+        val users = dataStore.getUsers().first()
+        val consultas = dataStore.getNotes().first()
+        val docs = dataStore.getDoctores().first()
 
-            usuarios.clear()
-            usuarios.addAll(users)
+        usuarios.clear()
+        usuarios.addAll(users)
 
-            doctores.clear()
-            doctores.addAll(docs)
+        doctores.clear()
+        doctores.addAll(docs)
 
-            consultasPorUsuario.clear()
-            consultas.forEach { (k,v) ->
-                consultasPorUsuario[k] = v.toMutableStateList()
-            }
+        consultasPorUsuario.clear()
+        consultas.forEach { (k, v) ->
+            consultasPorUsuario[k] = v.toMutableStateList()
         }
     }
 
+
     //Registro de usuario
-    fun registrarUsuario(email: String, password: String): Boolean{
+    fun registrarUsuario(email: String, password: String,usuario: String): Boolean{
         if (usuarios.any{ it.email_user == email }) return false
-        val nuevo = Usuario(email, password)
+        val nuevo = Usuario(email, password,usuario)
         usuarios.add(nuevo)
         guardarUsuarios()
         return true
     }
 
-    fun registrarDoctor( nombre: String, rut:String, email_doc: String, password_doc: String):Boolean {
+    fun registrarDoctor( email_doc: String, password_doc: String,usuario:String):Boolean {
         if(doctores.any{ it.email_doc == email_doc}) return false
-        val nuevo = Doctor(nombre = nombre,rut=rut,email_doc=email_doc,password_doc=password_doc)
+        val nuevo = Doctor(email_doc=email_doc,password_doc=password_doc,usuario)
         doctores.add(nuevo)
         guardarDoctores()
+        return true
     }
 
     //G
@@ -75,7 +77,7 @@ class AppState(private  val dataStore: DataStoreManager){
     }
 
     fun loginDoctor(nombre: String, rut:String, email_doc: String, password_doc: String):Boolean{
-        val doc = doctores.find { it.nombre == nombre && it.rut == rut && it.email_doc == email_doc && it.password_doc == password_doc }
+        val doc = doctores.find { it.email_doc == email_doc && it.password_doc == password_doc }
         return if(doc != null){
             doctorActual = doc
             true
@@ -109,7 +111,7 @@ class AppState(private  val dataStore: DataStoreManager){
         }
     }
 
-    private fun guardarDoctores(){
+    private  fun guardarDoctores(){
         scope.launch {
             dataStore.saveDoctores(doctores)
         }

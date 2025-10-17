@@ -30,10 +30,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.example.app_kotlin.R
-import com.myapplication.data.AppState
+import com.example.app_kotlin.model.AppState
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+@OptIn(ExperimentalMaterial3Api::class,)
 @Composable
 fun LoginScreen( onNavigateToRegistro: () -> Unit,onNavigateToConsultaCliente: () -> Unit, appState: AppState) {
 
@@ -43,6 +44,10 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit,onNavigateToConsultaCliente: (
     // Estados de errores
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
+
+    val coroutineScope = rememberCoroutineScope()
+    var loginError by remember { mutableStateOf<String?>(null) }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -178,21 +183,48 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit,onNavigateToConsultaCliente: (
 
                         Button(
                             onClick = {
-
                                 val errors = validateLogin(email, password)
                                 emailError = errors.emailError
                                 passwordError = errors.password1Error
+                                loginError = null // Reinicia mensaje de error
 
                                 if (errors.emailError == null && errors.password1Error == null) {
-                                    onNavigateToConsultaCliente()
+                                    coroutineScope.launch {
+                                        val esUsuario = email.endsWith("@user.com")
+                                        val esDoctor = email.endsWith("@doc.com")
+
+                                        val loginExitoso = when {
+                                            esUsuario -> appState.loginUser(email, password)
+                                            esDoctor -> appState.loginDoctor("", "", email, password)
+                                            else -> false
+                                        }
+
+                                        if (loginExitoso) {
+                                            onNavigateToConsultaCliente()
+                                        } else {
+                                            loginError = "Correo o contraseña incorrectos"
+                                        }
+                                    }
                                 }
+
                             },
                             modifier = Modifier.padding(6.dp),
                             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primaryContainer)
-                        ) {
+                        )
+                        {
                             Text("Ingresar",
                                 color = MaterialTheme.colorScheme.onSurface )
                         }
+
+                        if (loginError != null) {
+                            Text(
+                                text = loginError!!,
+                                color = Color.Red,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center,
@@ -225,3 +257,4 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit,onNavigateToConsultaCliente: (
         }
     }
 }
+

@@ -5,5 +5,7 @@ object Screens {
     const val REGISTER = "registro"
     const val CONSULTACLIENTE = "consultacliente"
 
-    const val AGENDA = "agemda"
+    const val AGENDA = "agenda"
+
+    const val CONSULTADOCTOR = "consultadoctor"
 }

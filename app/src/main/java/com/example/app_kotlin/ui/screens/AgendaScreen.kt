@@ -1,7 +1,18 @@
 package com.example.app_kotlin.ui.screens
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,13 +26,14 @@ fun AgendaScreen(
     onNavigateToConsultaCliente: () -> Unit,
     appState: AppState
 ) {
+    // --- Variables de estado para los campos ---
     var fecha by remember { mutableStateOf("") }
     var hora by remember { mutableStateOf("") }
     var especialidad by remember { mutableStateOf("") }
     var doctorSeleccionado by remember { mutableStateOf("") }
-
-    val doctores = appState.doctores
     var expanded by remember { mutableStateOf(false) }
+
+    val doctores = appState.doctores // ✅ Se obtiene desde AppState
 
     Column(
         modifier = Modifier
@@ -52,7 +64,7 @@ fun AgendaScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // --- Selector de doctor ---
+        // --- Selector de Doctor ---
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded }
@@ -62,7 +74,7 @@ fun AgendaScreen(
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Seleccionar Doctor") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                 modifier = Modifier
                     .menuAnchor()
                     .fillMaxWidth()
@@ -84,23 +96,22 @@ fun AgendaScreen(
             }
         }
 
-        // --- Botón Confirmar ---
+        // --- Botón de Confirmar ---
         Button(
             onClick = {
-                if (fecha.isNotBlank() &&
+                if (
+                    fecha.isNotBlank() &&
                     hora.isNotBlank() &&
                     especialidad.isNotBlank() &&
                     doctorSeleccionado.isNotBlank()
                 ) {
-                    // 👇 Aquí va tu código para crear y guardar la consulta
                     val nuevaConsulta = Consulta(
-                        id = 0, // se reemplaza en agregarConsulta()
+                        id = 0,
                         fecha = fecha,
                         hora = hora,
                         especialidad = especialidad,
                         doctor = doctorSeleccionado
                     )
-
                     appState.agregarConsulta(nuevaConsulta)
                     onNavigateToConsultaCliente()
                 }
@@ -111,9 +122,10 @@ fun AgendaScreen(
             Text("Confirmar")
         }
 
+        // --- Mensaje si no hay doctores ---
         if (doctores.isEmpty()) {
             Text(
-                "No hay doctores registrados aún.",
+                text = "No hay doctores registrados aún.",
                 color = Color.Gray,
                 modifier = Modifier.padding(top = 8.dp)
             )

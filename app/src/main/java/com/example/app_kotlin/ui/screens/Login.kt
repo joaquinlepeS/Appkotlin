@@ -36,7 +36,8 @@ import com.example.app_kotlin.model.AppState
 
 @OptIn(ExperimentalMaterial3Api::class,)
 @Composable
-fun LoginScreen( onNavigateToRegistro: () -> Unit,onNavigateToConsultaCliente: () -> Unit, appState: AppState) {
+fun LoginScreen( onNavigateToRegistro: () -> Unit,onNavigateToConsultaCliente: () -> Unit,
+                 onNavigateToConsultaDoctor: () -> Unit, appState: AppState) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -200,8 +201,13 @@ fun LoginScreen( onNavigateToRegistro: () -> Unit,onNavigateToConsultaCliente: (
                                         }
 
                                         if (loginExitoso) {
-                                            
-                                            onNavigateToConsultaCliente()
+                                            val esUsuario = email.endsWith("@user.com")
+                                            val esDoctor = email.endsWith("@doc.com")
+                                            if(esUsuario) {
+                                                    onNavigateToConsultaCliente()
+                                                }else{
+                                                    onNavigateToConsultaDoctor()
+                                            }
                                         } else {
                                             loginError = "Correo o contraseña incorrectos"
                                         }

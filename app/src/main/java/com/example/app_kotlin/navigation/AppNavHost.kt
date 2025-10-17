@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.app_kotlin.model.AppState
 import com.example.app_kotlin.ui.screens.AgendaScreen
 import com.example.app_kotlin.ui.screens.ConsultaClienteScreen
+import com.example.app_kotlin.ui.screens.ConsultaDoctorScreen
 import com.example.app_kotlin.ui.screens.LoginScreen
 import com.example.app_kotlin.ui.screens.RegistroScreen
 
@@ -21,6 +22,7 @@ fun AppNavHost(appState: AppState) {
             LoginScreen(
                 onNavigateToRegistro = { navController.navigate(Screens.REGISTER) },
                 onNavigateToConsultaCliente = {navController.navigate(Screens.CONSULTACLIENTE)},
+                onNavigateToConsultaDoctor = {navController.navigate(Screens.CONSULTADOCTOR)},
                 appState = appState
 
 
@@ -39,6 +41,14 @@ fun AppNavHost(appState: AppState) {
                 onNavigateToAgendaScreen = {navController.navigate(Screens.AGENDA)},
                 onNavigateToLoginScreen = {navController.navigate(Screens.LOGIN)},
                 appState = appState)
+        }
+
+        composable(Screens.CONSULTADOCTOR){
+            ConsultaDoctorScreen(
+                onNavigateToAgendaScreen = {navController.navigate(Screens.AGENDA)},
+                onNavigateToLoginScreen = {navController.navigate(Screens.LOGIN)},
+                appState = appState
+            )
         }
 
         composable(Screens.AGENDA)  {

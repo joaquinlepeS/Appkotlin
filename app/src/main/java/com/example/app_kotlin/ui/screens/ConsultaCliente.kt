@@ -16,9 +16,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.app_kotlin.R
 import com.example.app_kotlin.model.AppState
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConsultaClienteScreen(onNavigateToAgendaScreen: () -> Unit,onNavigateToLoginScreen: () -> Unit,appState: AppState) {
+fun ConsultaClienteScreen(
+    onNavigateToAgendaScreen: () -> Unit,
+    onNavigateToLoginScreen: () -> Unit,
+    appState: AppState
+) {
     Box(modifier = Modifier.fillMaxSize()) {
 
         // 🌄 Fondo con imagen
@@ -34,7 +39,7 @@ fun ConsultaClienteScreen(onNavigateToAgendaScreen: () -> Unit,onNavigateToLogin
             containerColor = Color.Transparent,
             floatingActionButton = {
                 FloatingActionButton(
-                    onClick = { /* TODO: Acción o navegación */ },
+                    onClick = { onNavigateToAgendaScreen },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = Color.White
                 ) {
@@ -129,65 +134,42 @@ fun ConsultaClienteScreen(onNavigateToAgendaScreen: () -> Unit,onNavigateToLogin
                                 contentPadding = PaddingValues(horizontal = 16.dp)
                             ) {
                                 items(5) { index ->
-                                    Card(
-                                        modifier = Modifier
-                                            .width(240.dp)
-                                            .height(240.dp)
-                                            .padding(vertical = 8.dp),
-                                        elevation = CardDefaults.cardElevation(8.dp),
-                                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondaryContainer)
-                                    ) {
-                                        Box(
-                                            contentAlignment = Alignment.Center,
-                                            modifier = Modifier.fillMaxSize()
-                                        ) {
-                                            Text("Card #$index")
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                                    val consultas = appState.obtenerConsultas()
 
-                    // 💙 Segunda sección con color distinto
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
-                        ),
-                        modifier = Modifier
-                            .height(120.dp)
-                            .padding(horizontal = 16.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(vertical = 16.dp)
-                        ) {
-                            Text(
-                                text = "Conoce a nuestro equipo",
-                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(bottom = 16.dp)
-                            )
-
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                contentPadding = PaddingValues(horizontal = 16.dp)
-                            ) {
-                                items(5) { index ->
-                                    Card(
-                                        modifier = Modifier
-                                            .width(240.dp)
-                                            .height(240.dp)
-                                            .padding(vertical = 8.dp),
-                                        elevation = CardDefaults.cardElevation(8.dp),
-                                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondaryContainer)
-                                    ) {
-                                        Box(
-                                            contentAlignment = Alignment.Center,
-                                            modifier = Modifier.fillMaxSize()
+                                    if (consultas.isEmpty()) {
+                                        Text(
+                                            text = "Aún no tienes consultas registradas.",
+                                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            modifier = Modifier.padding(16.dp)
+                                        )
+                                    } else {
+                                        LazyRow(
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                            contentPadding = PaddingValues(horizontal = 16.dp)
                                         ) {
-                                            Text("Opción #$index")
+                                            items(consultas.size) { index ->
+                                                val consulta = consultas[index]
+                                                Card(
+                                                    modifier = Modifier
+                                                        .width(220.dp)
+                                                        .height(150.dp)
+                                                        .padding(vertical = 8.dp),
+                                                    elevation = CardDefaults.cardElevation(8.dp),
+                                                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondaryContainer)
+                                                ) {
+                                                    Box(
+                                                        contentAlignment = Alignment.Center,
+                                                        modifier = Modifier.fillMaxSize()
+                                                    ) {
+                                                        Text(
+                                                            text = consulta,
+                                                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                            style = MaterialTheme.typography.bodyMedium
+                                                        )
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -196,7 +178,79 @@ fun ConsultaClienteScreen(onNavigateToAgendaScreen: () -> Unit,onNavigateToLogin
                     }
                 }
             }
+
+            // 💙 Segunda sección con color distinto
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
+                ),
+                modifier = Modifier
+                    .height(120.dp)
+                    .padding(horizontal = 16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                ) {
+                    Text(
+                        text = "Conoce a nuestro equipo",
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp)
+                    ) {
+                        items(5) { index ->
+                            val doctores = appState.doctores
+
+                            if (doctores.isEmpty()) {
+                                Text(
+                                    text = "Aún no hay doctores registrados.",
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                            } else {
+                                LazyRow(
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    contentPadding = PaddingValues(horizontal = 16.dp)
+                                ) {
+                                    items(doctores.size) { index ->
+                                        val doc = doctores[index]
+                                        Card(
+                                            modifier = Modifier
+                                                .width(220.dp)
+                                                .height(150.dp)
+                                                .padding(vertical = 8.dp),
+                                            elevation = CardDefaults.cardElevation(8.dp),
+                                            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondaryContainer)
+                                        ) {
+                                            Box(
+                                                contentAlignment = Alignment.Center,
+                                                modifier = Modifier.fillMaxSize()
+                                            ) {
+                                                Text(
+                                                    text = doc.nombre,
+                                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                    style = MaterialTheme.typography.bodyMedium
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
         }
     }
 }
+
+
 

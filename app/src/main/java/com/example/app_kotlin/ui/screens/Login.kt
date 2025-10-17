@@ -30,11 +30,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.example.app_kotlin.R
+import com.myapplication.data.AppState
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen( onNavigateToRegistro: () -> Unit,onNavigateToConsultaCliente: () -> Unit) {
+fun LoginScreen( onNavigateToRegistro: () -> Unit,onNavigateToConsultaCliente: () -> Unit, appState: AppState) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }

@@ -18,7 +18,7 @@ import com.example.app_kotlin.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConsultaClienteScreen() {
+fun ConsultaClienteScreen(onNavigateToAgendaScreen: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize()) {
 
         // 🌄 Fondo con imagen
@@ -171,8 +171,6 @@ fun ConsultaClienteScreen() {
                                             modifier = Modifier.fillMaxSize()
                                         ) {
                                             Text("Opción #$index")
-
-                                            Image()
                                         }
                                     }
                                 }

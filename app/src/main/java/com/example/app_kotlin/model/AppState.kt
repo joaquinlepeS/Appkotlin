@@ -73,7 +73,7 @@ class AppState(private val dataStore: DataStoreManager) {
     // registrar doctor
     fun registrarDoctor(nombre: String, email: String, password: String, especialidad:String): Boolean {
         if (doctores.any { it.email_doc == email }) return false
-        val nuevo = Doctor(nombre, email, password, especialidad = especialidad)
+        val nuevo = Doctor(nombre, email, password, especialidad)
         doctores.add(nuevo)
         scope.launch { dataStore.saveDoctores(doctores) }
         return true

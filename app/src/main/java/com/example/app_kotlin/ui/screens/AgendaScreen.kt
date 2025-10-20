@@ -1,26 +1,15 @@
 package com.example.app_kotlin.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.app_kotlin.model.AppState
 import com.example.app_kotlin.model.Consulta
 import com.example.app_kotlin.utils.validateFecha
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,8 +25,15 @@ fun AgendaScreen(
     var expandedEspecialidad by remember { mutableStateOf(false) }
     var expandedDoctor by remember { mutableStateOf(false) }
 
-    val doctores = appState.doctores
     var fechaError by remember { mutableStateOf<String?>(null) }
+
+    // --- Cargar doctores desde DataStore ---
+    LaunchedEffect(Unit) {
+        appState.cargarDatos()
+    }
+
+    // --- Observar directamente la lista mutable de AppState ---
+    val doctores = appState.doctores // mutableStateListOf<Doctor>, Compose detecta cambios
 
     Column(
         modifier = Modifier
@@ -93,15 +89,13 @@ fun AgendaScreen(
                 expanded = expandedEspecialidad,
                 onDismissRequest = { expandedEspecialidad = false }
             ) {
-                // Mostramos especialidades únicas
                 doctores.map { it.especialidad }.distinct().forEach { esp ->
                     DropdownMenuItem(
                         text = { Text(esp) },
                         onClick = {
                             especialidad = esp
+                            doctorSeleccionado = "" // limpiar doctor al cambiar especialidad
                             expandedEspecialidad = false
-                            // Limpiamos el doctor seleccionado al cambiar de especialidad
-                            doctorSeleccionado = ""
                         }
                     )
                 }
@@ -127,7 +121,6 @@ fun AgendaScreen(
                 expanded = expandedDoctor,
                 onDismissRequest = { expandedDoctor = false }
             ) {
-                // Filtramos doctores por especialidad seleccionada
                 doctores.filter { it.especialidad == especialidad }.forEach { doctor ->
                     DropdownMenuItem(
                         text = { Text(doctor.nombre) },
@@ -157,7 +150,6 @@ fun AgendaScreen(
                         doctor = doctorSeleccionado,
                         paciente = appState.usuarioActual?.nombre ?: "Desconocido"
                     )
-
                     appState.agregarConsulta(nuevaConsulta)
                     onNavigateToConsultaCliente()
                 }

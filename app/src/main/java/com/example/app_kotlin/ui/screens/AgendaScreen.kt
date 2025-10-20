@@ -28,15 +28,15 @@ fun AgendaScreen(
     onNavigateToConsultaCliente: () -> Unit,
     appState: AppState
 ) {
-    // --- Variables de estado para los campos ---
     var fecha by remember { mutableStateOf("") }
     var hora by remember { mutableStateOf("") }
     var especialidad by remember { mutableStateOf("") }
     var doctorSeleccionado by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
 
-    val doctores = appState.doctores // ✅ Se obtiene desde AppState
+    var expandedEspecialidad by remember { mutableStateOf(false) }
+    var expandedDoctor by remember { mutableStateOf(false) }
 
+    val doctores = appState.doctores
     var fechaError by remember { mutableStateOf<String?>(null) }
 
     Column(
@@ -47,10 +47,13 @@ fun AgendaScreen(
     ) {
         Text("Agendar Consulta", style = MaterialTheme.typography.headlineSmall)
 
+        // --- Campo de fecha ---
         OutlinedTextField(
             value = fecha,
-            onValueChange = { fecha = it
-                            fechaError = validateFecha(fecha)},
+            onValueChange = {
+                fecha = it
+                fechaError = validateFecha(fecha)
+            },
             label = { Text("Fecha (ej: 2025-10-20)") },
             modifier = Modifier.fillMaxWidth()
         )
@@ -58,13 +61,13 @@ fun AgendaScreen(
         if (fechaError != null) {
             Text(
                 text = fechaError!!,
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(start = 16.dp, top = 4.dp)
             )
         }
 
-
+        // --- Campo de hora ---
         OutlinedTextField(
             value = hora,
             onValueChange = { hora = it },
@@ -72,61 +75,65 @@ fun AgendaScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
+        // --- Selector de especialidad ---
         ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded }
+            expanded = expandedEspecialidad,
+            onExpandedChange = { expandedEspecialidad = !expandedEspecialidad }
         ) {
             OutlinedTextField(
-                value = doctorSeleccionado,
+                value = especialidad,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Seleccionar Doctor") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier
-                    .fillMaxWidth()
+                label = { Text("Seleccionar especialidad") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEspecialidad) },
+                modifier = Modifier.fillMaxWidth()
             )
 
             ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
+                expanded = expandedEspecialidad,
+                onDismissRequest = { expandedEspecialidad = false }
             ) {
-                doctores.forEach { doctor ->
+                // Mostramos especialidades únicas
+                doctores.map { it.especialidad }.distinct().forEach { esp ->
                     DropdownMenuItem(
-                        text = { Text(doctor.especialidad) },
+                        text = { Text(esp) },
                         onClick = {
-                            doctorSeleccionado = doctor.especialidad
-                            expanded = false
+                            especialidad = esp
+                            expandedEspecialidad = false
+                            // Limpiamos el doctor seleccionado al cambiar de especialidad
+                            doctorSeleccionado = ""
                         }
                     )
                 }
             }
         }
 
-        // --- Selector de Doctor ---
+        // --- Selector de doctor ---
         ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded }
+            expanded = expandedDoctor,
+            onExpandedChange = { expandedDoctor = !expandedDoctor }
         ) {
             OutlinedTextField(
                 value = doctorSeleccionado,
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Seleccionar Doctor") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier
-                    .fillMaxWidth()
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDoctor) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = especialidad.isNotBlank()
             )
 
             ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
+                expanded = expandedDoctor,
+                onDismissRequest = { expandedDoctor = false }
             ) {
-                doctores.forEach { doctor ->
+                // Filtramos doctores por especialidad seleccionada
+                doctores.filter { it.especialidad == especialidad }.forEach { doctor ->
                     DropdownMenuItem(
                         text = { Text(doctor.nombre) },
                         onClick = {
                             doctorSeleccionado = doctor.nombre
-                            expanded = false
+                            expandedDoctor = false
                         }
                     )
                 }
@@ -136,7 +143,7 @@ fun AgendaScreen(
         // --- Botón de Confirmar ---
         Button(
             onClick = {
-                if (fechaError==null&&
+                if (fechaError == null &&
                     fecha.isNotBlank() &&
                     hora.isNotBlank() &&
                     especialidad.isNotBlank() &&
@@ -161,7 +168,6 @@ fun AgendaScreen(
             Text("Confirmar")
         }
 
-        // --- Mensaje si no hay doctores ---
         if (doctores.isEmpty()) {
             Text(
                 text = "No hay doctores registrados aún.",

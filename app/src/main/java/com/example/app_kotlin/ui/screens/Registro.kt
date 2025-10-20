@@ -63,6 +63,7 @@ import com.example.app_kotlin.utils.validatePassword
 import com.example.app_kotlin.utils.validateRegistro
 import com.example.app_kotlin.utils.validateUsuario
 import com.example.app_kotlin.utils.validateRepetirPassword
+import com.example.app_kotlin.utils.validateEspecialidad
 
 
 
@@ -74,12 +75,13 @@ fun RegistroScreen(onNavigateToLogin: () -> Unit, appState: AppState ){
     var email by remember { mutableStateOf("") }
     var password1 by remember { mutableStateOf("") }
     var password2 by remember { mutableStateOf("") }
-
+    var especialidad by remember {mutableStateOf("")}
     // Estados de errores
     var usuarioError by remember { mutableStateOf<String?>(null) }
     var emailError by remember { mutableStateOf<String?>(null) }
     var password1Error by remember { mutableStateOf<String?>(null) }
     var password2Error by remember { mutableStateOf<String?>(null) }
+    var especialidadError by remember{ mutableStateOf<String?>(null)}
 
     var registroExitoso by remember { mutableStateOf(false) }
 
@@ -280,30 +282,72 @@ fun RegistroScreen(onNavigateToLogin: () -> Unit, appState: AppState ){
 
                         Spacer(modifier = Modifier.height(24.dp))
 
+                        if(email.endsWith("@doc.com", ignoreCase = true)){
+                            OutlinedTextField(
+                                value = especialidad,
+                                onValueChange = {
+                                    especialidad = it
+                                    password2Error = validateRepetirPassword(password1,password2)
+                                },
+                                label = { Text("Ingrese su especialidad") },
+                                singleLine = true,
+                                modifier = Modifier.padding(3.dp),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                                    cursorColor = MaterialTheme.colorScheme.primary,
+                                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                    focusedLabelColor = MaterialTheme.colorScheme.primaryContainer
+
+                                )
+                            )
+
+                            if (especialidadError != null) {
+                                Text(
+                                    text = especialidadError!!,
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
                         Button(
                             onClick = {
-
-                                val errors = validateRegistro(usuario, email, password1, password2)
+                                val errors = validateRegistro(usuario, email, password1, password2, especialidad)
                                 usuarioError = errors.usuarioError
                                 emailError = errors.emailError
                                 password1Error = errors.password1Error
                                 password2Error = errors.password2Error
+                                especialidadError = errors.especialidadError
 
-                                if (errors.emailError == null && errors.password1Error == null
-                                    && errors.password2Error == null && errors.usuarioError == null) {
+                                val isDoctor = email.endsWith("@doc.com", ignoreCase = true)
+                                val isUser = email.endsWith("@user.com", ignoreCase = true)
 
-                                    // Determinar tipo de cuenta
+                                val camposValidos = if (isDoctor) {
+                                    // Si es doctor, también debe tener especialidad válida
+                                    errors.usuarioError == null &&
+                                            errors.emailError == null &&
+                                            errors.password1Error == null &&
+                                            errors.password2Error == null &&
+                                            errors.especialidadError == null
+                                } else {
+                                    // Si es usuario, no validar especialidad
+                                    errors.usuarioError == null &&
+                                            errors.emailError == null &&
+                                            errors.password1Error == null &&
+                                            errors.password2Error == null
+                                }
+
+                                if (camposValidos) {
                                     val registroOk = when {
-                                        email.endsWith("@user.com", ignoreCase = true) -> {
-                                            appState.registrarUsuario( email,password1,usuario)
+                                        isUser -> {
+                                            appState.registrarUsuario(email, password1, usuario)
                                         }
-                                        email.endsWith("@doc.com", ignoreCase = true) -> {
-                                            appState.registrarDoctor(
-
-                                                email,
-                                                password1,
-                                                usuario
-                                            )
+                                        isDoctor -> {
+                                            appState.registrarDoctor(email, password1, usuario, especialidad)
                                             true
                                         }
                                         else -> {
@@ -324,6 +368,7 @@ fun RegistroScreen(onNavigateToLogin: () -> Unit, appState: AppState ){
                         ) {
                             Text("Registrarse", color = MaterialTheme.colorScheme.onSurface)
                         }
+
                     }
                 }
             }

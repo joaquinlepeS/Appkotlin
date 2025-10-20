@@ -72,12 +72,35 @@ fun AgendaScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        OutlinedTextField(
-            value = especialidad,
-            onValueChange = { especialidad = it },
-            label = { Text("Especialidad") },
-            modifier = Modifier.fillMaxWidth()
-        )
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }
+        ) {
+            OutlinedTextField(
+                value = doctorSeleccionado,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Seleccionar Doctor") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                doctores.forEach { doctor ->
+                    DropdownMenuItem(
+                        text = { Text(doctor.especialidad) },
+                        onClick = {
+                            doctorSeleccionado = doctor.especialidad
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
 
         // --- Selector de Doctor ---
         ExposedDropdownMenuBox(
@@ -91,7 +114,6 @@ fun AgendaScreen(
                 label = { Text("Seleccionar Doctor") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                 modifier = Modifier
-                    .menuAnchor()
                     .fillMaxWidth()
             )
 

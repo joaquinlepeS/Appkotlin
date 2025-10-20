@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 data class Usuario(val email_user: String, val password_user: String, val nombre: String)
-data class Doctor(val email_doc: String, val password_doc: String, val nombre: String)
+data class Doctor(val email_doc: String, val password_doc: String, val nombre: String, val especialidad:String)
 
 data class Consulta(
     val id: Int,
@@ -71,9 +71,9 @@ class AppState(private val dataStore: DataStoreManager) {
     }
 
     // registrar doctor
-    fun registrarDoctor(nombre: String, email: String, password: String): Boolean {
+    fun registrarDoctor(nombre: String, email: String, password: String, especialidad:String): Boolean {
         if (doctores.any { it.email_doc == email }) return false
-        val nuevo = Doctor(nombre, email, password)
+        val nuevo = Doctor(nombre, email, password, especialidad = especialidad)
         doctores.add(nuevo)
         scope.launch { dataStore.saveDoctores(doctores) }
         return true

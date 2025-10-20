@@ -13,7 +13,8 @@ data class LoginErrors(
     val usuarioError: String? = null,
     val emailError: String? = null,
     val password1Error: String? = null,
-    val password2Error: String? = null
+    val password2Error: String? = null,
+    val especialidadError: String? = null
 )
 
 data class AgendaErrors(
@@ -59,12 +60,20 @@ fun validateRepetirPassword(password1: String,password2: String): String? {
     }
 }
 
-fun validateRegistro(usuario: String,email: String, password1: String,password2: String):LoginErrors{
+fun validateEspecialidad(especialidad:String):String?
+{   return when {
+    especialidad.isEmpty() -> "La especialidad no puede estar vacía"
+    else-> null
+}
+}
+
+fun validateRegistro(usuario: String,email: String, password1: String,password2: String,especialidad:String):LoginErrors{
     return LoginErrors(
         usuarioError = validateUsuario(usuario),
         emailError = validateEmail(email),
         password1Error = validatePassword(password1),
-        password2Error = validateRepetirPassword(password1,password2 )
+        password2Error = validateRepetirPassword(password1,password2 ),
+        especialidadError = validateEspecialidad(especialidad)
     )
 }
 

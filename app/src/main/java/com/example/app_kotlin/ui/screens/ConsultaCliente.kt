@@ -9,9 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
@@ -120,10 +122,11 @@ fun ConsultaClienteScreen(
                             modifier = Modifier.padding(vertical = 16.dp)
                         ) {
                             Text(
-                                text = "Bienvenido a tu consulta",
+                                text = "Bienvenido, ${appState.usuarioActual?.nombre ?: "Usuario"} a tu consulta",
                                 color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(bottom = 12.dp)
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(all = 12.dp),
+                                textAlign = TextAlign.Center
                             )
 
                             val consultas = appState.obtenerConsultas()
@@ -154,11 +157,39 @@ fun ConsultaClienteScreen(
                                                 contentAlignment = Alignment.Center,
                                                 modifier = Modifier.fillMaxSize()
                                             ) {
-                                                Text(
-                                                    text = "consulta",
-                                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                    style = MaterialTheme.typography.bodyMedium
-                                                )
+                                                Column(
+                                                    modifier = Modifier
+                                                        .fillMaxSize()
+                                                        .padding(8.dp),
+                                                    verticalArrangement = Arrangement.SpaceEvenly,
+                                                    horizontalAlignment = Alignment.Start
+                                                ) {
+                                                    Text(
+                                                        text = "consulta",
+                                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                        style = MaterialTheme.typography.bodyMedium
+                                                    )
+                                                    Text(
+                                                        text = "ID: ${consulta.id}",
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                                                    )
+                                                    Text(
+                                                        text = "Fecha: ${consulta.fecha}",
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                                                    )
+                                                    Text(
+                                                        text = "Hora: ${consulta.hora}",
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                                                    )
+                                                    Text(
+                                                        text = "Especialidad: ${consulta.especialidad}",
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                                                    )
+                                                }
                                             } // <-- Cierre correcto del Box
                                         } // <-- Cierre correcto del Card
                                     }
@@ -216,12 +247,22 @@ fun ConsultaClienteScreen(
                                             Box(
                                                 contentAlignment = Alignment.Center,
                                                 modifier = Modifier.fillMaxSize()
-                                            ) {
-                                                Text(
-                                                    text = doc.nombre,
-                                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                    style = MaterialTheme.typography.bodyMedium
-                                                )
+                                            ){
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                ){
+                                                Image(
+                                                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                                                        contentDescription = "Logo",
+                                                        modifier = Modifier.size(100.dp)
+                                                    )
+                                                    Text(
+                                                        text = doc.nombre,
+                                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                        style = MaterialTheme.typography.titleLarge
+                                                    )
+
+                                                }
                                             }
                                         }
                                     }

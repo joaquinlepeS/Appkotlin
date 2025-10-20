@@ -114,11 +114,10 @@ class AppState(private val dataStore: DataStoreManager) {
             paciente = usuarioActual!!.nombre
         )
 
-        // Guardar para el usuario
         listaUsuario.add(nuevaConsulta)
         scope.launch { dataStore.saveConsulta(consultasPorUsuario) }
 
-        // Guardar para el doctor
+
         val doctorEmail = doctores.find { it.nombre == consulta.doctor }?.email_doc ?: return
         val listaDoctor = consultasPorDoctor.getOrPut(doctorEmail) { mutableStateListOf() }
         val nextIdDoctor = if (listaDoctor.isEmpty()) 1 else (listaDoctor.maxOf { it.id } + 1)

@@ -1,7 +1,24 @@
 package com.example.app_kotlin.utils
 
 import android.util.Patterns
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
+import java.util.Calendar
+import java.util.Locale
 
+
+data class LoginErrors(
+    val usuarioError: String? = null,
+    val emailError: String? = null,
+    val password1Error: String? = null,
+    val password2Error: String? = null
+)
+
+data class AgendaErrors(
+    val fechaError: String? =null
+)
 
 fun validateUsuario(usuario: String): String? {
     return when {
@@ -28,13 +45,6 @@ fun validatePassword(password: String): String? {
 }
 
 
-data class LoginErrors(
-    val usuarioError: String? = null,
-    val emailError: String? = null,
-    val password1Error: String? = null,
-    val password2Error: String? = null
-)
-
 fun validateLogin(email: String, password: String): LoginErrors {
     return LoginErrors(
         emailError = validateEmail(email),
@@ -56,4 +66,22 @@ fun validateRegistro(usuario: String,email: String, password1: String,password2:
         password1Error = validatePassword(password1),
         password2Error = validateRepetirPassword(password1,password2 )
     )
+}
+
+fun validateFecha(fecha: String): String? {
+    return try {
+        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        formatter.isLenient = false
+        val fechaIngresada = formatter.parse(fecha) ?: return "Fecha incorrecta"
+
+        val hoy = Calendar.getInstance().time
+
+        if (fechaIngresada.before(hoy)) {
+            "La fecha no puede ser anterior a hoy"
+        } else {
+            null // todo ok
+        }
+    } catch (e: Exception) {
+        "Fecha incorrecta"
+    }
 }

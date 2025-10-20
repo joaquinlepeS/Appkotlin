@@ -14,11 +14,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.app_kotlin.model.AppState
 import com.example.app_kotlin.model.Consulta
+import com.example.app_kotlin.utils.validateFecha
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +37,8 @@ fun AgendaScreen(
 
     val doctores = appState.doctores // ✅ Se obtiene desde AppState
 
+    var fechaError by remember { mutableStateOf<String?>(null) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -45,10 +49,21 @@ fun AgendaScreen(
 
         OutlinedTextField(
             value = fecha,
-            onValueChange = { fecha = it },
+            onValueChange = { fecha = it
+                            fechaError = validateFecha(fecha)},
             label = { Text("Fecha (ej: 2025-10-20)") },
             modifier = Modifier.fillMaxWidth()
         )
+
+        if (fechaError != null) {
+            Text(
+                text = fechaError!!,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
+
 
         OutlinedTextField(
             value = hora,
@@ -99,7 +114,7 @@ fun AgendaScreen(
         // --- Botón de Confirmar ---
         Button(
             onClick = {
-                if (
+                if (fechaError==null&&
                     fecha.isNotBlank() &&
                     hora.isNotBlank() &&
                     especialidad.isNotBlank() &&

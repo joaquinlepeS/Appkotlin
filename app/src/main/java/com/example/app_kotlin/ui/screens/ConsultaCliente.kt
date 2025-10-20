@@ -185,6 +185,11 @@ fun ConsultaClienteScreen(
                                                         color = MaterialTheme.colorScheme.onSecondaryContainer
                                                     )
                                                     Text(
+                                                        text = "Doctor/a: ${consulta.doctor}",
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                                                    )
+                                                    Text(
                                                         text = "Especialidad: ${consulta.especialidad}",
                                                         style = MaterialTheme.typography.bodyMedium,
                                                         color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -254,13 +259,19 @@ fun ConsultaClienteScreen(
                                                 Image(
                                                         painter = painterResource(id = R.drawable.ic_launcher_foreground),
                                                         contentDescription = "Logo",
-                                                        modifier = Modifier.size(100.dp)
+                                                        modifier = Modifier.size(64.dp)
                                                     )
                                                     Text(
                                                         text = doc.nombre,
                                                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                                                         style = MaterialTheme.typography.titleLarge
                                                     )
+
+                                                Text(
+                                                    text = "Especialidad: ${doc.especialidad}",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                                )
 
                                                 }
                                             }

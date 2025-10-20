@@ -9,15 +9,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.core.content.ContextCompat
 import com.example.app_kotlin.model.AppState
 import com.example.app_kotlin.model.Consulta
-import com.example.app_kotlin.utils.validateFecha
 import com.example.app_kotlin.utils.showNotification
+import com.example.app_kotlin.utils.validateFecha
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,17 +33,17 @@ fun AgendaScreen(
     var especialidad by rememberSaveable { mutableStateOf("") }
     var doctorSeleccionado by rememberSaveable { mutableStateOf("") }
 
+    var fechaError by remember { mutableStateOf<String?>(null) }
+
+    val doctores = appState.doctores
+    val especialidades = doctores.map { it.especialidad }.distinct()
+    val doctoresFiltrados = doctores.filter { it.especialidad == especialidad }
+
     var expandedEspecialidad by remember { mutableStateOf(false) }
     var expandedDoctor by remember { mutableStateOf(false) }
 
-    var fechaError by remember { mutableStateOf<String?>(null) }
-    var horaError by remember { mutableStateOf<String?>(null) }
-    var especialidadError by remember { mutableStateOf<String?>(null) }
-    var doctorError by remember { mutableStateOf<String?>(null) }
-
+    // --- Manejo de permiso de notificaciones (Android 13+) ---
     var notificationPermissionGranted by remember { mutableStateOf(false) }
-
-    // Pide permiso de notificaciones (Android 13+)
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted -> notificationPermissionGranted = granted }
@@ -61,19 +61,18 @@ fun AgendaScreen(
         }
     }
 
-    val doctores = appState.doctores
-    val especialidades = doctores.map { it.especialidad }.distinct()
-    val doctoresFiltrados = doctores.filter { it.especialidad == especialidad }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Agendar Consulta", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = "Agendar Consulta",
+            style = MaterialTheme.typography.headlineSmall
+        )
 
-        // --- Fecha ---
+        // --- Campo Fecha ---
         OutlinedTextField(
             value = fecha,
             onValueChange = {
@@ -83,25 +82,25 @@ fun AgendaScreen(
             label = { Text("Fecha (ej: 2025-10-20)") },
             modifier = Modifier.fillMaxWidth()
         )
-        if (fechaError != null) Text(fechaError!!, color = MaterialTheme.colorScheme.error)
+        if (fechaError != null) {
+            Text(
+                text = fechaError!!,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
 
-        // --- Hora ---
+        // --- Campo Hora ---
         OutlinedTextField(
             value = hora,
-            onValueChange = {
-                hora = it
-                horaError = if (hora.isBlank()) "La hora no puede estar vacía" else null
-            },
+            onValueChange = { hora = it },
             label = { Text("Hora (ej: 15:30)") },
             modifier = Modifier.fillMaxWidth()
         )
-        if (horaError != null) Text(horaError!!, color = MaterialTheme.colorScheme.error)
 
-        // --- Especialidad ---
-        ExposedDropdownMenuBox(
-            expanded = expandedEspecialidad,
-            onExpandedChange = { expandedEspecialidad = !expandedEspecialidad }
-        ) {
+        // --- Dropdown Especialidad ---
+        ExposedDropdownMenuBox(expanded = expandedEspecialidad, onExpandedChange = {}) {
             OutlinedTextField(
                 value = especialidad,
                 onValueChange = {},
@@ -109,6 +108,7 @@ fun AgendaScreen(
                 label = { Text("Seleccionar especialidad") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedEspecialidad) },
                 modifier = Modifier
+                    .menuAnchor()
                     .fillMaxWidth()
                     .clickable { expandedEspecialidad = true }
             )
@@ -128,13 +128,9 @@ fun AgendaScreen(
                 }
             }
         }
-        if (especialidadError != null) Text(especialidadError!!, color = MaterialTheme.colorScheme.error)
 
-        // --- Doctor ---
-        ExposedDropdownMenuBox(
-            expanded = expandedDoctor,
-            onExpandedChange = { expandedDoctor = !expandedDoctor }
-        ) {
+        // --- Dropdown Doctor ---
+        ExposedDropdownMenuBox(expanded = expandedDoctor, onExpandedChange = {}) {
             OutlinedTextField(
                 value = doctorSeleccionado,
                 onValueChange = {},
@@ -142,6 +138,7 @@ fun AgendaScreen(
                 label = { Text("Seleccionar Doctor") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedDoctor) },
                 modifier = Modifier
+                    .menuAnchor()
                     .fillMaxWidth()
                     .clickable { if (especialidad.isNotBlank()) expandedDoctor = true },
                 enabled = especialidad.isNotBlank()
@@ -161,15 +158,14 @@ fun AgendaScreen(
                 }
             }
         }
-        if (doctorError != null) Text(doctorError!!, color = MaterialTheme.colorScheme.error)
 
         // --- Botón Confirmar ---
         Button(
             onClick = {
                 fechaError = validateFecha(fecha)
-                horaError = if (hora.isBlank()) "La hora no puede estar vacía" else null
-                especialidadError = if (especialidad.isBlank()) "Selecciona una especialidad" else null
-                doctorError = if (doctorSeleccionado.isBlank()) "Selecciona un doctor" else null
+                val horaError = if (hora.isBlank()) "La hora no puede estar vacía" else null
+                val especialidadError = if (especialidad.isBlank()) "Selecciona una especialidad" else null
+                val doctorError = if (doctorSeleccionado.isBlank()) "Selecciona un doctor" else null
 
                 if (fechaError == null && horaError == null &&
                     especialidadError == null && doctorError == null
@@ -184,7 +180,7 @@ fun AgendaScreen(
                     )
                     appState.agregarConsulta(nuevaConsulta)
 
-                    // Mostrar notificación
+                    // --- Mostrar notificación ---
                     if (notificationPermissionGranted) {
                         showNotification(context, doctorSeleccionado, fecha, hora)
                     }
@@ -197,8 +193,13 @@ fun AgendaScreen(
         ) {
             Text("Confirmar")
         }
+
         if (doctores.isEmpty()) {
-            Text("No hay doctores registrados aún.", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
+            Text(
+                text = "No hay doctores registrados aún.",
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                modifier = Modifier.padding(top = 8.dp)
+            )
         }
     }
 }

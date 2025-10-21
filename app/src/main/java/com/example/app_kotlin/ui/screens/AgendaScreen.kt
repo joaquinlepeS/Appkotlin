@@ -1,11 +1,18 @@
 package com.example.app_kotlin.ui.screens
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.example.app_kotlin.model.AppState
 import com.example.app_kotlin.model.Consulta
 import com.example.app_kotlin.utils.*
@@ -16,6 +23,8 @@ fun AgendaScreen(
     onNavigateToConsultaCliente: () -> Unit,
     appState: AppState
 ) {
+    val context = LocalContext.current
+
     var fecha by remember { mutableStateOf("") }
     var hora by remember { mutableStateOf("") }
     var especialidad by remember { mutableStateOf("") }
@@ -24,7 +33,6 @@ fun AgendaScreen(
     var expandedEspecialidad by remember { mutableStateOf(false) }
     var expandedDoctor by remember { mutableStateOf(false) }
 
-    // --- Estados de error ---
     var fechaError by remember { mutableStateOf<String?>(null) }
     var horaError by remember { mutableStateOf<String?>(null) }
     var especialidadError by remember { mutableStateOf<String?>(null) }
@@ -34,6 +42,25 @@ fun AgendaScreen(
     val especialidades = doctores.map { it.especialidad }.distinct()
     val doctoresFiltrados = doctores.filter { it.especialidad == especialidad }
 
+    // --- Permiso de notificación ---
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        // No hacemos nada extra aquí, solo pedimos permiso
+    }
+
+    LaunchedEffect(Unit) {
+        val permissionGranted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (!permissionGranted) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    // --- Aquí sigue exactamente todo tu código existente ---
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -45,31 +72,28 @@ fun AgendaScreen(
             style = MaterialTheme.typography.headlineSmall
         )
 
-        // Campo Fecha
         OutlinedTextField(
             value = fecha,
             onValueChange = {
                 fecha = it
-                fechaError = validateFecha(fecha) // validación en tiempo real
+                fechaError = validateFecha(fecha)
             },
             label = { Text("Fecha (ej: 2025-10-20)") },
             modifier = Modifier.fillMaxWidth()
         )
         if (fechaError != null) Text(fechaError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
 
-        // Campo Hora
         OutlinedTextField(
             value = hora,
             onValueChange = {
                 hora = it
-                horaError = validateHora(hora) // validación en tiempo real
+                horaError = validateHora(hora)
             },
             label = { Text("Hora (ej: 15:30)") },
             modifier = Modifier.fillMaxWidth()
         )
         if (horaError != null) Text(horaError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
 
-        // Dropdown Especialidad (no tocado)
         ExposedDropdownMenuBox(
             expanded = expandedEspecialidad,
             onExpandedChange = { expandedEspecialidad = !expandedEspecialidad }
@@ -96,7 +120,7 @@ fun AgendaScreen(
                             especialidad = esp
                             expandedEspecialidad = false
                             doctorSeleccionado = ""
-                            especialidadError = validateEspecialidad(especialidad) // validación al seleccionar
+                            especialidadError = validateEspecialidad(especialidad)
                         }
                     )
                 }
@@ -104,7 +128,6 @@ fun AgendaScreen(
         }
         if (especialidadError != null) Text(especialidadError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
 
-        // Dropdown Doctor (no tocado)
         ExposedDropdownMenuBox(
             expanded = expandedDoctor,
             onExpandedChange = { expandedDoctor = !expandedDoctor }
@@ -118,9 +141,7 @@ fun AgendaScreen(
                 modifier = Modifier
                     .menuAnchor()
                     .fillMaxWidth()
-                    .clickable {
-                        if (especialidad.isNotBlank()) expandedDoctor = true
-                    },
+                    .clickable { if (especialidad.isNotBlank()) expandedDoctor = true },
                 enabled = especialidad.isNotBlank()
             )
             ExposedDropdownMenu(
@@ -133,7 +154,7 @@ fun AgendaScreen(
                         onClick = {
                             doctorSeleccionado = doctor.nombre
                             expandedDoctor = false
-                            doctorError = validateDoctor(doctorSeleccionado) // validación al seleccionar
+                            doctorError = validateDoctor(doctorSeleccionado)
                         }
                     )
                 }
@@ -141,7 +162,6 @@ fun AgendaScreen(
         }
         if (doctorError != null) Text(doctorError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
 
-        // Botón Confirmar
         Button(
             onClick = {
                 val errors = validateAgenda(fecha, hora, especialidad, doctorSeleccionado)
@@ -160,6 +180,19 @@ fun AgendaScreen(
                         paciente = appState.usuarioActual?.nombre ?: "Desconocido"
                     )
                     appState.agregarConsulta(nuevaConsulta)
+
+                    // --- Notificación ---
+                    val permissionGranted = ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+                    if (permissionGranted) {
+                        showAgendaNotification(
+                            context,
+                            "Consulta con $doctorSeleccionado el $fecha a las $hora"
+                        )
+                    }
+
                     onNavigateToConsultaCliente()
                 }
             },

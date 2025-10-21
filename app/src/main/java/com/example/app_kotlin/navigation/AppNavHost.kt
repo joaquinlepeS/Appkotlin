@@ -1,60 +1,110 @@
-package com.example.app_kotlin.navigation
+package com.example.app_kotlin.ui.screens
 
-import androidx.compose.runtime.Composable
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
 import com.example.app_kotlin.model.AppState
-import com.example.app_kotlin.ui.screens.AgendaScreen
-import com.example.app_kotlin.ui.screens.ConsultaClienteScreen
-import com.example.app_kotlin.ui.screens.ConsultaDoctorScreen
-import com.example.app_kotlin.ui.screens.LoginScreen
-import com.example.app_kotlin.ui.screens.RegistroScreen
+import com.example.app_kotlin.utils.validateEmail
+import com.example.app_kotlin.utils.validatePassword
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavHost(appState: AppState) {
-    val navController = rememberNavController() // ahora navController está dentro de un Composable
+fun LoginScreen(
+    appState: AppState,
+    onNavigateToHome: () -> Unit,
+    onNavigateToRegistro: () -> Unit,
+    esDoctor: Boolean // true si es login de doctor
+) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
-    NavHost(navController = navController, startDestination = Screens.LOGIN) {
-        composable(Screens.LOGIN) {
-            LoginScreen(
-                onNavigateToRegistro = { navController.navigate(Screens.REGISTER) },
-                onNavigateToConsultaCliente = {navController.navigate(Screens.CONSULTACLIENTE)},
-                onNavigateToConsultaDoctor = {navController.navigate(Screens.CONSULTADOCTOR)},
-                appState = appState
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+    var loginError by remember { mutableStateOf<String?>(null) }
 
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = if (esDoctor) "Login Doctor" else "Login Usuario",
+            style = MaterialTheme.typography.headlineSmall
+        )
 
-            )
+        // Email
+        OutlinedTextField(
+            value = email,
+            onValueChange = {
+                email = it
+                emailError = validateEmail(it)
+                loginError = null
+            },
+            label = { Text("Email") },
+            isError = emailError != null,
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+        )
+        if (emailError != null) {
+            Text(emailError!!, color = MaterialTheme.colorScheme.error)
         }
-        composable(Screens.REGISTER) {
-            RegistroScreen(
-                onNavigateToLogin = { navController.navigate(Screens.LOGIN) },
-                appState = appState)
 
-
+        // Password
+        OutlinedTextField(
+            value = password,
+            onValueChange = {
+                password = it
+                passwordError = validatePassword(it)
+                loginError = null
+            },
+            label = { Text("Contraseña") },
+            visualTransformation = PasswordVisualTransformation(),
+            isError = passwordError != null,
+            modifier = Modifier.fillMaxWidth()
+        )
+        if (passwordError != null) {
+            Text(passwordError!!, color = MaterialTheme.colorScheme.error)
         }
 
-        composable(Screens.CONSULTACLIENTE){
-            ConsultaClienteScreen(
-                onNavigateToAgendaScreen = {navController.navigate(Screens.AGENDA)},
-                onNavigateToLoginScreen = {navController.navigate(Screens.LOGIN)},
-                appState = appState)
+        // Botón Login
+        Button(
+            onClick = {
+                emailError = validateEmail(email)
+                passwordError = validatePassword(password)
+
+                if (emailError == null && passwordError == null) {
+                    val exito = if (esDoctor) {
+                        appState.loginDoctor(email.trim().lowercase(), password)
+                    } else {
+                        appState.loginUser(email.trim().lowercase(), password)
+                    }
+
+                    if (exito) {
+                        loginError = null
+                        onNavigateToHome() // navegación que tenías antes
+                    } else {
+                        loginError = "Usuario o contraseña incorrecta"
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Ingresar")
         }
 
-        composable(Screens.CONSULTADOCTOR){
-            ConsultaDoctorScreen(
-                onNavigateToAgendaScreen = {navController.navigate(Screens.AGENDA)},
-                onNavigateToLoginScreen = {navController.navigate(Screens.LOGIN)},
-                appState = appState
-            )
+        // Navegar a registro
+        TextButton(onClick = { onNavigateToRegistro() }) {
+            Text(text = if (esDoctor) "Registrar Doctor" else "Registrar Usuario")
         }
 
-        composable(Screens.AGENDA)  {
-            AgendaScreen(onNavigateToConsultaCliente = {navController.navigate(Screens.CONSULTACLIENTE)},
-                appState = appState)
+        if (loginError != null) {
+            Text(loginError!!, color = MaterialTheme.colorScheme.error)
         }
-
     }
 }

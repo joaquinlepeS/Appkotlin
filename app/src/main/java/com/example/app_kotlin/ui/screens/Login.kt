@@ -1,262 +1,121 @@
-package com.example.app_kotlin.ui.screens
+package com.example.app_kotlin.model
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import com.example.app_kotlin.utils.validateEmail
-import com.example.app_kotlin.utils.validateLogin
-import com.example.app_kotlin.utils.validatePassword
-import androidx.compose.foundation.layout.Arrangement
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import com.example.app_kotlin.R
-import com.example.app_kotlin.model.AppState
+data class Usuario(val email_user: String, val password_user: String, val nombre: String)
+data class Doctor(val email_doc: String, val password_doc: String, val nombre: String, val especialidad: String)
 
+data class Consulta(
+    val id: Int,
+    val fecha: String,
+    val hora: String,
+    val especialidad: String,
+    val doctor: String,
+    val paciente: String
+)
 
+class AppState(private val dataStore: DataStoreManager) {
 
-@OptIn(ExperimentalMaterial3Api::class,)
-@Composable
-fun LoginScreen( onNavigateToRegistro: () -> Unit,onNavigateToConsultaCliente: () -> Unit,
-                 onNavigateToConsultaDoctor: () -> Unit, appState: AppState) {
+    val usuarios = mutableStateListOf<Usuario>()
+    val doctores = mutableStateListOf<Doctor>()
 
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    val consultasPorUsuario = mutableMapOf<String, SnapshotStateList<Consulta>>()
+    val consultasPorDoctor = mutableMapOf<String, SnapshotStateList<Consulta>>()
 
-    // Estados de errores
-    var emailError by remember { mutableStateOf<String?>(null) }
-    var passwordError by remember { mutableStateOf<String?>(null) }
+    var usuarioActual: Usuario? = null
+    var doctorActual: Doctor? = null
 
-    val coroutineScope = rememberCoroutineScope()
-    var loginError by remember { mutableStateOf<String?>(null) }
+    private val scope = CoroutineScope(Dispatchers.IO)
 
+    // Cargar datos persistidos
+    suspend fun cargarDatos() {
+        val users = dataStore.getUsers().first()
+        val docs = dataStore.getDoctores().first()
+        val consultas = dataStore.getConsulta().first()
+        val consultasDoctor = dataStore.getConsultasPorDoctor().first()
 
-    Box(modifier = Modifier.fillMaxSize()) {
+        usuarios.clear()
+        usuarios.addAll(users)
 
-        Image(
-            painter = painterResource(id = R.drawable.wallpaper ),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
-        Scaffold(
-            containerColor = Color.Transparent,
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+        doctores.clear()
+        doctores.addAll(docs)
 
-                            Image(
-                                painter = painterResource(id = R.drawable.baseline_medical_services_24),
-                                contentDescription = "Logo",
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .padding(end = 8.dp) // espacio entre imagen y texto
-                            )
-
-                            Text(
-                                text = "ConsultaMed",
-                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
-                )
-            },
-
-            ) { innerPadding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .background(Color.Black.copy(alpha = 0.3f)) ,
-                contentAlignment = Alignment.Center,
-
-                ) {
-                Card(
-                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.onSurfaceVariant),
-                    border = BorderStroke(16.dp, Color.Transparent), //
-                    elevation = CardDefaults.cardElevation(36.dp),
-                    modifier = Modifier.padding(16.dp)
-
-
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    )
-                    {
-                        Text(
-                            text = "Inicia Sesion",
-                            fontSize = 26.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(vertical = 24.dp),
-                            color = MaterialTheme.colorScheme.onPrimary,
-
-
-                            )
-
-                        OutlinedTextField(
-                            value = email,
-                            onValueChange = {
-                                email = it
-                                emailError = validateEmail(email) // validación en tiempo real
-                            },
-                            label = { Text("email") },
-                            singleLine = true,
-                            modifier = Modifier.padding(3.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                                cursorColor = MaterialTheme.colorScheme.primary,
-                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                focusedLabelColor = MaterialTheme.colorScheme.primaryContainer
-                            )
-                        )
-
-                        if (emailError != null) {
-                            Text(
-                                text = emailError!!,
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        OutlinedTextField(
-                            value = password,
-                            onValueChange = {
-                                password = it
-                                passwordError = validatePassword(password)
-                            },
-                            label = { Text("Contraseña") },
-                            singleLine = true,
-                            visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                            modifier = Modifier.padding(3.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                                cursorColor = MaterialTheme.colorScheme.primary,
-                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                focusedLabelColor = MaterialTheme.colorScheme.primaryContainer
-
-                            )
-                        )
-
-                        if (passwordError != null) {
-                            Text(
-                                text = passwordError!!,
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                            )
-                        }
-
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        Button(
-                            onClick = {
-                                val errors = validateLogin(email, password)
-                                emailError = errors.emailError
-                                passwordError = errors.password1Error
-                                loginError = null // Reinicia mensaje de error
-
-                                if (errors.emailError == null && errors.password1Error == null) {
-                                    coroutineScope.launch {
-                                        val esUsuario = email.endsWith("@user.com")
-                                        val esDoctor = email.endsWith("@doc.com")
-
-                                        val loginExitoso = when {
-                                            esUsuario -> appState.loginUser(email, password)
-                                            esDoctor -> appState.loginDoctor( email, password)
-                                            else -> false
-                                        }
-
-                                        if (loginExitoso) {
-                                            val esUsuario = email.endsWith("@user.com")
-
-                                            if(esUsuario) {
-                                                    onNavigateToConsultaCliente()
-                                                }else{
-                                                    onNavigateToConsultaDoctor()
-                                            }
-                                        } else {
-                                            loginError = "Correo o contraseña incorrectos"
-                                        }
-                                    }
-                                }
-
-                            },
-                            modifier = Modifier.padding(6.dp),
-                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primaryContainer)
-                        )
-                        {
-                            Text("Ingresar",
-                                color = MaterialTheme.colorScheme.onSurface )
-                        }
-
-                        if (loginError != null) {
-                            Text(
-                                text = loginError!!,
-                                color = Color.Red,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(top = 8.dp)
-                            )
-                        }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "¿No tienes una cuenta?",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-
-                            Spacer(modifier = Modifier.width(4.dp)) // espacio entre Text y TextButton
-
-                            TextButton(
-                                onClick = { onNavigateToRegistro() },
-                                contentPadding = PaddingValues(0.dp) // elimina padding interno si quieres que quede pegado al texto
-                            ) {
-                                Text(
-                                    text = "Regístrate",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primaryContainer
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+        consultasPorUsuario.clear()
+        consultas.forEach { (key, value) ->
+            consultasPorUsuario[key] = value.toMutableStateList()
         }
+
+        consultasPorDoctor.clear()
+        consultasDoctor.forEach { (key, value) ->
+            consultasPorDoctor[key] = value.toMutableStateList()
+        }
+
+        // Logs para depuración
+        println("✅ Datos cargados en memoria")
+        println("Usuarios: $usuarios")
+        println("Doctores: $doctores")
+    }
+
+    fun registrarUsuario(nombre: String, email: String, password: String): Boolean {
+        if (usuarios.any { it.email_user == email }) return false
+        val nuevo = Usuario(email, password, nombre)
+        usuarios.add(nuevo)
+        scope.launch { dataStore.saveUsers(usuarios) }
+        return true
+    }
+
+    fun registrarDoctor(nombre: String, email: String, password: String, especialidad: String): Boolean {
+        if (doctores.any { it.email_doc == email }) return false
+        val nuevo = Doctor(email, password, nombre, especialidad)
+        doctores.add(nuevo)
+        scope.launch { dataStore.saveDoctores(doctores) }
+        return true
+    }
+
+    fun loginUser(email: String, password: String): Boolean {
+        val user = usuarios.find { it.email_user == email && it.password_user == password }
+        return if (user != null) {
+            usuarioActual = user
+            true
+        } else false
+    }
+
+    fun loginDoctor(email: String, password: String): Boolean {
+        val doc = doctores.find { it.email_doc == email && it.password_doc == password }
+        return if (doc != null) {
+            doctorActual = doc
+            true
+        } else false
+    }
+
+    fun logout() {
+        usuarioActual = null
+        doctorActual = null
+    }
+
+    fun agregarConsulta(consulta: Consulta) {
+        val emailUsuario = usuarioActual?.email_user ?: return
+        val listaUsuario = consultasPorUsuario.getOrPut(emailUsuario) { mutableStateListOf() }
+        val nextIdUsuario = if (listaUsuario.isEmpty()) 1 else (listaUsuario.maxOf { it.id } + 1)
+        val nuevaConsulta = consulta.copy(id = nextIdUsuario, paciente = usuarioActual!!.nombre)
+        listaUsuario.add(nuevaConsulta)
+        scope.launch { dataStore.saveConsulta(consultasPorUsuario) }
+
+        val doctorEmail = doctores.find { it.nombre == consulta.doctor }?.email_doc ?: return
+        val listaDoctor = consultasPorDoctor.getOrPut(doctorEmail) { mutableStateListOf() }
+        val nextIdDoctor = if (listaDoctor.isEmpty()) 1 else (listaDoctor.maxOf { it.id } + 1)
+        listaDoctor.add(nuevaConsulta)
+        scope.launch { dataStore.saveConsultasPorDoctor(consultasPorDoctor) }
+    }
+
+    fun obtenerConsultas(): List<Consulta> {
+        val email = usuarioActual?.email_user ?: return emptyList()
+        return consultasPorUsuario[email] ?: emptyList()
     }
 }
-

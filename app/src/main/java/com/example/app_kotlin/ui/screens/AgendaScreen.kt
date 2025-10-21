@@ -1,15 +1,14 @@
 package com.example.app_kotlin.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.app_kotlin.model.AppState
 import com.example.app_kotlin.model.Consulta
 import com.example.app_kotlin.utils.validateFecha
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,13 +26,9 @@ fun AgendaScreen(
 
     var fechaError by remember { mutableStateOf<String?>(null) }
 
-    // --- Cargar doctores desde DataStore ---
-    LaunchedEffect(Unit) {
-        appState.cargarDatos()
-    }
-
-    // --- Observar directamente la lista mutable de AppState ---
-    val doctores = appState.doctores // mutableStateListOf<Doctor>, Compose detecta cambios
+    val doctores = appState.doctores
+    val especialidades = doctores.map { it.especialidad }.distinct()
+    val doctoresFiltrados = doctores.filter { it.especialidad == especialidad }
 
     Column(
         modifier = Modifier
@@ -41,9 +36,12 @@ fun AgendaScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Agendar Consulta", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = "Agendar Consulta",
+            style = MaterialTheme.typography.headlineSmall
+        )
 
-        // --- Campo de fecha ---
+        // Campo Fecha
         OutlinedTextField(
             value = fecha,
             onValueChange = {
@@ -63,7 +61,7 @@ fun AgendaScreen(
             )
         }
 
-        // --- Campo de hora ---
+        // Campo Hora
         OutlinedTextField(
             value = hora,
             onValueChange = { hora = it },
@@ -71,7 +69,7 @@ fun AgendaScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // --- Selector de especialidad ---
+        // Dropdown Especialidad
         ExposedDropdownMenuBox(
             expanded = expandedEspecialidad,
             onExpandedChange = { expandedEspecialidad = !expandedEspecialidad }
@@ -82,27 +80,30 @@ fun AgendaScreen(
                 readOnly = true,
                 label = { Text("Seleccionar especialidad") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEspecialidad) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .menuAnchor() // 👈 clave para que funcione bien
+                    .fillMaxWidth()
+                    .clickable { expandedEspecialidad = true } // 👈 abre con clic
             )
 
             ExposedDropdownMenu(
                 expanded = expandedEspecialidad,
                 onDismissRequest = { expandedEspecialidad = false }
             ) {
-                doctores.map { it.especialidad }.distinct().forEach { esp ->
+                especialidades.forEach { esp ->
                     DropdownMenuItem(
                         text = { Text(esp) },
                         onClick = {
                             especialidad = esp
-                            doctorSeleccionado = "" // limpiar doctor al cambiar especialidad
                             expandedEspecialidad = false
+                            doctorSeleccionado = ""
                         }
                     )
                 }
             }
         }
 
-        // --- Selector de doctor ---
+        // Dropdown Doctor
         ExposedDropdownMenuBox(
             expanded = expandedDoctor,
             onExpandedChange = { expandedDoctor = !expandedDoctor }
@@ -113,7 +114,12 @@ fun AgendaScreen(
                 readOnly = true,
                 label = { Text("Seleccionar Doctor") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDoctor) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .menuAnchor() // 👈 también aquí
+                    .fillMaxWidth()
+                    .clickable {
+                        if (especialidad.isNotBlank()) expandedDoctor = true
+                    },
                 enabled = especialidad.isNotBlank()
             )
 
@@ -121,7 +127,7 @@ fun AgendaScreen(
                 expanded = expandedDoctor,
                 onDismissRequest = { expandedDoctor = false }
             ) {
-                doctores.filter { it.especialidad == especialidad }.forEach { doctor ->
+                doctoresFiltrados.forEach { doctor ->
                     DropdownMenuItem(
                         text = { Text(doctor.nombre) },
                         onClick = {
@@ -133,7 +139,7 @@ fun AgendaScreen(
             }
         }
 
-        // --- Botón de Confirmar ---
+        // Botón Confirmar
         Button(
             onClick = {
                 if (fechaError == null &&
@@ -163,7 +169,7 @@ fun AgendaScreen(
         if (doctores.isEmpty()) {
             Text(
                 text = "No hay doctores registrados aún.",
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                 modifier = Modifier.padding(top = 8.dp)
             )
         }

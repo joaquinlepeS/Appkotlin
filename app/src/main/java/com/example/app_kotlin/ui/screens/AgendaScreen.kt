@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.app_kotlin.model.AppState
 import com.example.app_kotlin.model.Consulta
-import com.example.app_kotlin.utils.validateFecha
+import com.example.app_kotlin.utils.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,7 +24,11 @@ fun AgendaScreen(
     var expandedEspecialidad by remember { mutableStateOf(false) }
     var expandedDoctor by remember { mutableStateOf(false) }
 
+    // --- Estados de error ---
     var fechaError by remember { mutableStateOf<String?>(null) }
+    var horaError by remember { mutableStateOf<String?>(null) }
+    var especialidadError by remember { mutableStateOf<String?>(null) }
+    var doctorError by remember { mutableStateOf<String?>(null) }
 
     val doctores = appState.doctores
     val especialidades = doctores.map { it.especialidad }.distinct()
@@ -46,30 +50,26 @@ fun AgendaScreen(
             value = fecha,
             onValueChange = {
                 fecha = it
-                fechaError = validateFecha(fecha)
+                fechaError = validateFecha(fecha) // validación en tiempo real
             },
             label = { Text("Fecha (ej: 2025-10-20)") },
             modifier = Modifier.fillMaxWidth()
         )
-
-        if (fechaError != null) {
-            Text(
-                text = fechaError!!,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-            )
-        }
+        if (fechaError != null) Text(fechaError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
 
         // Campo Hora
         OutlinedTextField(
             value = hora,
-            onValueChange = { hora = it },
+            onValueChange = {
+                hora = it
+                horaError = validateHora(hora) // validación en tiempo real
+            },
             label = { Text("Hora (ej: 15:30)") },
             modifier = Modifier.fillMaxWidth()
         )
+        if (horaError != null) Text(horaError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
 
-        // Dropdown Especialidad
+        // Dropdown Especialidad (no tocado)
         ExposedDropdownMenuBox(
             expanded = expandedEspecialidad,
             onExpandedChange = { expandedEspecialidad = !expandedEspecialidad }
@@ -81,11 +81,10 @@ fun AgendaScreen(
                 label = { Text("Seleccionar especialidad") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEspecialidad) },
                 modifier = Modifier
-                    .menuAnchor() // 👈 clave para que funcione bien
+                    .menuAnchor()
                     .fillMaxWidth()
-                    .clickable { expandedEspecialidad = true } // 👈 abre con clic
+                    .clickable { expandedEspecialidad = true }
             )
-
             ExposedDropdownMenu(
                 expanded = expandedEspecialidad,
                 onDismissRequest = { expandedEspecialidad = false }
@@ -97,13 +96,15 @@ fun AgendaScreen(
                             especialidad = esp
                             expandedEspecialidad = false
                             doctorSeleccionado = ""
+                            especialidadError = validateEspecialidad(especialidad) // validación al seleccionar
                         }
                     )
                 }
             }
         }
+        if (especialidadError != null) Text(especialidadError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
 
-        // Dropdown Doctor
+        // Dropdown Doctor (no tocado)
         ExposedDropdownMenuBox(
             expanded = expandedDoctor,
             onExpandedChange = { expandedDoctor = !expandedDoctor }
@@ -115,14 +116,13 @@ fun AgendaScreen(
                 label = { Text("Seleccionar Doctor") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDoctor) },
                 modifier = Modifier
-                    .menuAnchor() // 👈 también aquí
+                    .menuAnchor()
                     .fillMaxWidth()
                     .clickable {
                         if (especialidad.isNotBlank()) expandedDoctor = true
                     },
                 enabled = especialidad.isNotBlank()
             )
-
             ExposedDropdownMenu(
                 expanded = expandedDoctor,
                 onDismissRequest = { expandedDoctor = false }
@@ -133,21 +133,24 @@ fun AgendaScreen(
                         onClick = {
                             doctorSeleccionado = doctor.nombre
                             expandedDoctor = false
+                            doctorError = validateDoctor(doctorSeleccionado) // validación al seleccionar
                         }
                     )
                 }
             }
         }
+        if (doctorError != null) Text(doctorError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
 
         // Botón Confirmar
         Button(
             onClick = {
-                if (fechaError == null &&
-                    fecha.isNotBlank() &&
-                    hora.isNotBlank() &&
-                    especialidad.isNotBlank() &&
-                    doctorSeleccionado.isNotBlank()
-                ) {
+                val errors = validateAgenda(fecha, hora, especialidad, doctorSeleccionado)
+                fechaError = errors.fechaError
+                horaError = errors.horaError
+                especialidadError = errors.especialidadError
+                doctorError = errors.doctorError
+
+                if (fechaError == null && horaError == null && especialidadError == null && doctorError == null) {
                     val nuevaConsulta = Consulta(
                         id = 0,
                         fecha = fecha,

@@ -1,7 +1,6 @@
 package com.example.app_kotlin.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -15,7 +14,7 @@ import com.example.app_kotlin.ui.screens.RegistroScreen
 
 @Composable
 fun AppNavHost(appState: AppState) {
-    val navController = rememberNavController() // ahora navController está dentro de un Composable
+    val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = Screens.LOGIN) {
         composable(Screens.LOGIN) {

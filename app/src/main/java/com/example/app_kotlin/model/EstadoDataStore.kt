@@ -1,8 +1,6 @@
 package com.example.app_kotlin.model
 
 import android.content.Context
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -10,7 +8,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.first
+
 
 
 
@@ -83,20 +81,7 @@ class DataStoreManager(private val context: Context){
         }
     }
 
-    suspend fun agregarConsultaParaDoctor(doctorId: String, nuevaConsulta: Consulta) {
-        // Obtener las consultas actuales por doctor
-        val consultasActuales = getConsultasPorDoctor().first().toMutableMap()
 
-        // Obtener la lista actual del doctor o crear una nueva
-        val listaConsultas = consultasActuales[doctorId]?.toMutableList() ?: mutableListOf()
-
-        // Agregar la nueva consulta
-        listaConsultas.add(nuevaConsulta)
-
-        // Guardar los cambios actualizados
-        consultasActuales[doctorId] = listaConsultas
-        saveConsultasPorDoctor(consultasActuales)
-    }
 
 
 

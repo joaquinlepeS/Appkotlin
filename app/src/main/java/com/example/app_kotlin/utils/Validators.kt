@@ -20,7 +20,7 @@ data class AgendaErrors(
     val doctorError: String? = null
 )
 
-// --- Validaciones existentes ---
+// --- VALIDACIONES PARA LOGIN Y REGISTRO ---
 fun validateUsuario(usuario: String): String? {
     return when {
         usuario.isEmpty() -> "El usuario no puede estar vacío"
@@ -90,7 +90,7 @@ fun validateFecha(fecha: String): String? {
     }
 }
 
-// --- NUEVAS VALIDACIONES PARA AGENDA SCREEN ---
+// ---VALIDACIONES PARA AGENDA SCREEN ---
 fun validateHora(hora: String): String? {
     return when {
         hora.isEmpty() -> "La hora no puede estar vacía"

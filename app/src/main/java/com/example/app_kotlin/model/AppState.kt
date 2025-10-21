@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
-import com.example.app_kotlin.model.DataStoreManager
+
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -120,7 +120,7 @@ class AppState(private val dataStore: DataStoreManager) {
 
         val doctorEmail = doctores.find { it.nombre == consulta.doctor }?.email_doc ?: return
         val listaDoctor = consultasPorDoctor.getOrPut(doctorEmail) { mutableStateListOf() }
-        val nextIdDoctor = if (listaDoctor.isEmpty()) 1 else (listaDoctor.maxOf { it.id } + 1)
+
         listaDoctor.add(nuevaConsulta)
         scope.launch { dataStore.saveConsultasPorDoctor(consultasPorDoctor) }
     }

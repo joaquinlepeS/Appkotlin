@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            LoginComposeTheme { // tu tema no se modifica
+            LoginComposeTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -35,7 +35,6 @@ class MainActivity : ComponentActivity() {
                     // Cargar datos al iniciar
                     LaunchedEffect (Unit) {
                         appState.cargarDatos()
-                        println("✅ Datos cargados en memoria")
 
                     }
 

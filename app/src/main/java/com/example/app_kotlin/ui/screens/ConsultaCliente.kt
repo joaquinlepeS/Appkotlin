@@ -9,18 +9,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
+
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.datastore.preferences.core.edit
 import com.example.app_kotlin.R
 import com.example.app_kotlin.model.AppState
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -190,8 +187,8 @@ fun ConsultaClienteScreen(
                                                         color = MaterialTheme.colorScheme.onSecondaryContainer
                                                     )
                                                 }
-                                            } // <-- Cierre correcto del Box
-                                        } // <-- Cierre correcto del Card
+                                            }
+                                        }
                                     }
                                 }
 
@@ -271,8 +268,8 @@ fun ConsultaClienteScreen(
                         }
                     }
 
-                } // Column
-            } // Box
-        } // Scaffold
-    } // Box
+                }
+            }
+        }
+    }
 }

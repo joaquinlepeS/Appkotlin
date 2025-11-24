@@ -62,8 +62,14 @@ fun AppNavHost() {
                 },
                 onNavigateToDoctorList = {
                     navController.navigate(Screens.DOCTOR_LIST)
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Screens.LOGIN) {
+                        popUpTo(0) { inclusive = true } // Limpia TODO el backstack
+                    }
                 }
             )
+
 
 
         }

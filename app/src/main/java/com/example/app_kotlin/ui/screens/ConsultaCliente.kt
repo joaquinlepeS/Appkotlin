@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,20 +27,24 @@ fun ConsultaClienteScreen(
     usuarioViewModel: UsuarioViewModel,
     consultaViewModel: ConsultaViewModel,
     onNavigateToAgenda: () -> Unit,
-    onNavigateToDoctorList: () -> Unit      // ✔ nuevo parámetro
+    onNavigateToDoctorList: () -> Unit,
+    onNavigateToLogin: () -> Unit
+
 ) {
     val usuarioActual = usuarioViewModel.usuarioActual
     val email = usuarioActual?.email ?: return
 
     val consultas = consultaViewModel.consultas.collectAsState().value
 
-    LaunchedEffect(Unit) {
-        consultaViewModel.cargarConsultas(email)
+    LaunchedEffect(usuarioActual) {
+        usuarioActual?.let {
+            consultaViewModel.cargarConsultas(it.email)
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // 🖼 Fondo con imagen igual al login
+        // 🔵 Fondo estético
         Image(
             painter = painterResource(id = R.drawable.wallpaper),
             contentDescription = null,
@@ -47,7 +52,7 @@ fun ConsultaClienteScreen(
             contentScale = ContentScale.Crop
         )
 
-        // Capa oscura para legibilidad
+        // 🔵 Capa oscura para legibilidad
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -65,55 +70,85 @@ fun ConsultaClienteScreen(
                     Icon(Icons.Default.Add, contentDescription = "Agendar nueva consulta")
                 }
             }
-        ) { innerPadding ->
+        ) { padding ->
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
+                    .padding(padding)
                     .padding(16.dp)
             ) {
 
-                // 👋 Saludo personalizado
-                Text(
-                    text = "Hola, ${usuarioActual.nombre} 👋",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = Color.White
-                )
+                // 👋 Saludo
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Hola, ${usuarioActual.nombre} 👋",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = Color.White
+                    )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                    IconButton(
+                        onClick = {
+                            usuarioViewModel.logout()
+
+                            onNavigateToLogin() // <-- navega y limpia navegación
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_logout_24),
+                            contentDescription = "Cerrar sesión",
+                            tint = Color.White
+                        )
+                    }
+
+                }
+
+
+                Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
                     text = "Mis Consultas",
                     style = MaterialTheme.typography.titleLarge,
-                    color = Color.White.copy(alpha = 0.9f),
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    color = Color.White.copy(alpha = 0.9f)
                 )
 
-                // 🌟 BOTÓN BONITO PARA CONOCER AL PERSONAL
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // 🟣 Botón para ir al personal médico
                 Button(
                     onClick = onNavigateToDoctorList,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 24.dp),
+                        .padding(bottom = 20.dp),
                     shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.tertiary,
                         contentColor = MaterialTheme.colorScheme.onTertiary
                     )
                 ) {
-                    Text("Conoce a nuestro personal")
+                    Text(
+                        "Conoce a nuestro personal",
+                        style = MaterialTheme.typography.titleMedium
+                    )
                 }
 
-                // 📝 Si no hay consultas
+                // 📌 Texto si no hay consultas
                 if (consultas.isEmpty()) {
                     Text(
-                        text = "No tienes consultas agendadas.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.8f)
+                        text = "No tienes consultas agendadas aún.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.White.copy(alpha = 0.85f)
                     )
                 } else {
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    // 🟢 Lista de consultas
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(14.dp),
+                        modifier = Modifier.fillMaxHeight()
+                    ) {
                         items(consultas) { consulta ->
                             ConsultaCard(
                                 consulta = consulta,
@@ -135,35 +170,52 @@ fun ConsultaCard(
     onEliminar: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 2.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
         ),
         elevation = CardDefaults.cardElevation(6.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
 
             Text(
                 text = consulta.especialidad,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleLarge
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Doctor: ${consulta.doctor}",
+                style = MaterialTheme.typography.bodyLarge
+            )
 
-            Text("Doctor: ${consulta.doctor}")
-            Text("Fecha: ${consulta.fecha}")
-            Text("Hora: ${consulta.hora}")
-            Text("Paciente: ${consulta.paciente}")
+            Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+                Text("Fecha: ${consulta.fecha}")
+                Text("Hora: ${consulta.hora}")
+            }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "Paciente: ${consulta.paciente}",
+                style = MaterialTheme.typography.bodyMedium
+            )
 
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // 🔴 Botón eliminar
             Button(
                 onClick = onEliminar,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
                 ),
                 shape = MaterialTheme.shapes.small
             ) {
+                Icon(Icons.Default.Delete, contentDescription = null)
+                Spacer(Modifier.width(6.dp))
                 Text("Eliminar")
             }
         }

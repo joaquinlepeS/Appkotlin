@@ -14,6 +14,7 @@ import com.example.app_kotlin.ui.screens.*
 import com.example.app_kotlin.viewmodel.ConsultaViewModel
 import com.example.app_kotlin.viewmodel.UsuarioViewModel
 import com.example.app_kotlin.viewmodel.DoctorViewModel
+import com.example.app_kotlin.viewmodel.ConsultaApiViewModel
 import com.google.gson.Gson
 import java.util.Base64
 
@@ -27,6 +28,7 @@ fun AppNavHost() {
     val usuarioViewModel: UsuarioViewModel = viewModel()
     val consultaViewModel: ConsultaViewModel = viewModel()
     val doctorViewModel: DoctorViewModel = viewModel()
+    val consultaApiViewModel: ConsultaApiViewModel = viewModel()   // ✔ AGREGADO
 
     NavHost(
         navController = navController,
@@ -61,11 +63,13 @@ fun AppNavHost() {
             )
         }
 
-        // AGENDA
+        // AGENDA  ✔ PASAMOS VIEWMODELS GLOBALMENTE
         composable(Screens.AGENDA) {
             AgendaScreen(
                 usuarioViewModel = usuarioViewModel,
                 consultaViewModel = consultaViewModel,
+                doctorViewModel = doctorViewModel,                // ✔ AGREGADO
+                consultaApiViewModel = consultaApiViewModel,      // ✔ AGREGADO
                 onNavigateToConsultaCliente = {
                     navController.navigate(Screens.CONSULTACLIENTE)
                 }
@@ -78,7 +82,6 @@ fun AppNavHost() {
                 doctorViewModel = doctorViewModel,
                 onDoctorSelected = { doctorJson ->
 
-                    // → protegemos el JSON para que no rompa la navegación
                     val encoded = Base64.getUrlEncoder().encodeToString(doctorJson.toByteArray())
 
                     navController.navigate("${Screens.DOCTOR_DETAIL}/$encoded")

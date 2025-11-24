@@ -8,7 +8,6 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.app_kotlin.model.Consulta
 import com.example.app_kotlin.viewmodel.ConsultaApiViewModel
 import com.example.app_kotlin.viewmodel.ConsultaViewModel
@@ -21,13 +20,12 @@ import com.example.app_kotlin.utils.*
 fun AgendaScreen(
     usuarioViewModel: UsuarioViewModel,
     consultaViewModel: ConsultaViewModel,
+    doctorViewModel: DoctorViewModel,          // ✔ ViewModel global
+    consultaApiViewModel: ConsultaApiViewModel, // ✔ ViewModel global
     onNavigateToConsultaCliente: () -> Unit
 ) {
-    // ViewModels externos
-    val doctorViewModel: DoctorViewModel = viewModel()
-    val consultaApiViewModel: ConsultaApiViewModel = viewModel()
 
-    // Cargar doctores al entrar
+    // Cargar doctores solo una vez
     LaunchedEffect(Unit) {
         doctorViewModel.fetchDoctors()
     }
@@ -198,7 +196,10 @@ fun AgendaScreen(
                         paciente = usuarioViewModel.usuarioActual!!.nombre
                     )
 
-                    consultaViewModel.agregarConsulta(usuarioViewModel.usuarioActual!!.email, consulta)
+                    consultaViewModel.agregarConsulta(
+                        usuarioViewModel.usuarioActual!!.email,
+                        consulta
+                    )
 
                     onNavigateToConsultaCliente()
                 }

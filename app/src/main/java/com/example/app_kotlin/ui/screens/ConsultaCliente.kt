@@ -1,13 +1,21 @@
 package com.example.app_kotlin.ui.screens
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.app_kotlin.R
 import com.example.app_kotlin.model.Consulta
 import com.example.app_kotlin.viewmodel.ConsultaViewModel
 import com.example.app_kotlin.viewmodel.UsuarioViewModel
@@ -16,45 +24,89 @@ import com.example.app_kotlin.viewmodel.UsuarioViewModel
 @Composable
 fun ConsultaClienteScreen(
     usuarioViewModel: UsuarioViewModel,
-    consultaViewModel: ConsultaViewModel
+    consultaViewModel: ConsultaViewModel,
+    onNavigateToAgenda: () -> Unit
 ) {
     val usuarioActual = usuarioViewModel.usuarioActual
     val email = usuarioActual?.email ?: return
 
-    // cargar consultas del usuario
     val consultas = consultaViewModel.consultas.collectAsState().value
 
     LaunchedEffect(Unit) {
         consultaViewModel.cargarConsultas(email)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
 
-        Text(
-            text = "Mis Consultas",
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(bottom = 16.dp)
+        // 🖼 Fondo con imagen igual al login
+        Image(
+            painter = painterResource(id = R.drawable.wallpaper),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
         )
 
-        if (consultas.isEmpty()) {
-            Text(
-                text = "No tienes consultas agendadas.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-        } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(consultas) { consulta ->
-                    ConsultaCard(
-                        consulta = consulta,
-                        onEliminar = {
-                            consultaViewModel.eliminarConsulta(email, consulta.id)
-                        }
+        // Capa oscura para legibilidad
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.35f))
+        )
+
+        Scaffold(
+            containerColor = Color.Transparent,
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = onNavigateToAgenda,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Agendar nueva consulta")
+                }
+            }
+        ) { innerPadding ->
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(16.dp)
+            ) {
+
+                // 👋 Saludo personalizado
+                Text(
+                    text = "Hola, ${usuarioActual.nombre} 👋",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = Color.White
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Mis Consultas",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color.White.copy(alpha = 0.9f),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                // 📝 Si no hay consultas
+                if (consultas.isEmpty()) {
+                    Text(
+                        text = "No tienes consultas agendadas.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White.copy(alpha = 0.8f)
                     )
+                } else {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        items(consultas) { consulta ->
+                            ConsultaCard(
+                                consulta = consulta,
+                                onEliminar = {
+                                    consultaViewModel.eliminarConsulta(email, consulta.id)
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -68,7 +120,10 @@ fun ConsultaCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.elevatedCardElevation(6.dp)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+        ),
+        elevation = CardDefaults.cardElevation(6.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
 
@@ -90,7 +145,8 @@ fun ConsultaCard(
                 onClick = onEliminar,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.error
-                )
+                ),
+                shape = MaterialTheme.shapes.small
             ) {
                 Text("Eliminar")
             }

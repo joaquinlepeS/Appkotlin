@@ -56,8 +56,12 @@ fun AppNavHost() {
         composable(Screens.CONSULTACLIENTE) {
             ConsultaClienteScreen(
                 usuarioViewModel = usuarioViewModel,
-                consultaViewModel = consultaViewModel
+                consultaViewModel = consultaViewModel,
+                onNavigateToAgenda = {
+                    navController.navigate(Screens.AGENDA)
+                }
             )
+
         }
 
         // AGENDA

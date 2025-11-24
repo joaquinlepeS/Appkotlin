@@ -39,5 +39,14 @@ class DoctorViewModel : ViewModel() {
             }
         }
     }
+
+    fun subirDoctoresAMockApi() {
+        viewModelScope.launch {
+            doctors.forEach { doctor ->
+                repository.subirDoctorAMockApi(doctor)
+            }
+        }
+    }
+
 }
 

@@ -11,7 +11,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.app_kotlin.model.Consulta
 import com.example.app_kotlin.viewmodel.ConsultaViewModel
-import com.example.app_kotlin.viewmodel.ConsultaApiViewModel
 import com.example.app_kotlin.viewmodel.DoctorViewModel
 import com.example.app_kotlin.viewmodel.UsuarioViewModel
 
@@ -21,7 +20,6 @@ fun AgendaScreen(
     usuarioViewModel: UsuarioViewModel,
     doctorViewModel: DoctorViewModel,
     consultaViewModel: ConsultaViewModel = viewModel(),
-    consultaApiViewModel: ConsultaApiViewModel = viewModel(),
     onNavigateToConsultaCliente: () -> Unit
 ) {
     val doctorViewModel: DoctorViewModel = viewModel()
@@ -51,7 +49,6 @@ fun AgendaScreen(
     val doctoresFiltrados = doctores.filter { it.especialidad == especialidad }
 
     // 🔥 Consultas globales (para detectar horas ocupadas)
-    val consultasApi = consultaApiViewModel.consultas
 
     // Horario base generado
     val horarioBase = listOf(
@@ -62,9 +59,6 @@ fun AgendaScreen(
     )
 
     // 🔥 Filtrar horas ya ocupadas por este doctor
-    val consultasDoctor = consultasApi.filter { it.doctorEmail == doctorSeleccionado }
-    val horasOcupadas = consultasDoctor.map { it.hora }
-    val horasDisponibles = horarioBase.filter { it !in horasOcupadas }
 
     Column(
         modifier = Modifier
@@ -166,20 +160,6 @@ fun AgendaScreen(
                     .clickable { expandedHora = true }
             )
 
-            ExposedDropdownMenu(
-                expanded = expandedHora,
-                onDismissRequest = { expandedHora = false }
-            ) {
-                horasDisponibles.forEach { h ->
-                    DropdownMenuItem(
-                        text = { Text(h) },
-                        onClick = {
-                            hora = h
-                            expandedHora = false
-                        }
-                    )
-                }
-            }
         }
 
         // -------------------------

@@ -12,7 +12,6 @@ import com.example.app_kotlin.ui.screens.*
 import com.example.app_kotlin.viewmodel.ConsultaViewModel
 import com.example.app_kotlin.viewmodel.UsuarioViewModel
 import com.example.app_kotlin.viewmodel.DoctorViewModel
-import com.example.app_kotlin.viewmodel.ConsultaApiViewModel
 import com.google.gson.Gson
 import android.util.Base64   // ✔ Base64 válido para todas las versiones de Android
 
@@ -25,7 +24,6 @@ fun AppNavHost() {
     val usuarioViewModel: UsuarioViewModel = viewModel()
     val consultaViewModel: ConsultaViewModel = viewModel()
     val doctorViewModel: DoctorViewModel = viewModel()
-    val consultaApiViewModel: ConsultaApiViewModel = viewModel()   // ✔ ya agregado anteriormente
 
     NavHost(
         navController = navController,
@@ -80,7 +78,6 @@ fun AppNavHost() {
                 usuarioViewModel = usuarioViewModel,
                 consultaViewModel = consultaViewModel,
                 doctorViewModel = doctorViewModel,
-                consultaApiViewModel = consultaApiViewModel,
                 onNavigateToConsultaCliente = {
                     navController.navigate(Screens.CONSULTACLIENTE)
                 }

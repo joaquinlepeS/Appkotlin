@@ -92,15 +92,9 @@ fun RegistroScreen(
             ) {
 
                 Card(
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(12.dp),
-                    shape = MaterialTheme.shapes.medium,
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
-                    )
+                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(36.dp),
+                    modifier = Modifier.padding(16.dp)
                 ) {
 
                     Column(
@@ -111,9 +105,10 @@ fun RegistroScreen(
 
                         Text(
                             text = "Crear Cuenta",
-                            fontSize = 28.sp,
+                            fontSize = 26.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.onSurface
                         )
 
                         // NOMBRE

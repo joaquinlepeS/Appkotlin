@@ -63,25 +63,17 @@ fun LoginScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Image(
-                                painter = painterResource(id = R.drawable.baseline_medical_services_24),
-                                contentDescription = "Logo",
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .padding(end = 8.dp)
-                            )
-
-                            Text(
-                                text = "ConsultaMed",
-                                fontSize = 22.sp,
+                        Text(
+                            "Consultapp",
+                            style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimary
+                                color = Color.White
                             )
-                        }
+                        )
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary
+                        containerColor = Color.Transparent,
+                        titleContentColor = Color.White
                     )
                 )
             }

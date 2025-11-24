@@ -48,17 +48,6 @@ fun AgendaScreen(
     val especialidades = doctores.map { it.especialidad }.distinct()
     val doctoresFiltrados = doctores.filter { it.especialidad == especialidad }
 
-    // 🔥 Consultas globales (para detectar horas ocupadas)
-
-    // Horario base generado
-    val horarioBase = listOf(
-        "09:00", "09:30", "10:00", "10:30",
-        "11:00", "11:30", "12:00",
-        "14:00", "14:30", "15:00",
-        "15:30", "16:00", "16:30"
-    )
-
-    // 🔥 Filtrar horas ya ocupadas por este doctor
 
     Column(
         modifier = Modifier

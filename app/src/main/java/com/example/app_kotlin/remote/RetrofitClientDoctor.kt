@@ -1,20 +1,41 @@
 package com.example.app_kotlin.remote
 
+import com.example.app_kotlin.model.RandomUserResponse
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
+
 
 object RetrofitClientDoctor {
 
     private const val BASE_URL = "https://randomuser.me/"
 
-    private val client = OkHttpClient.Builder().build()
+    // Logging interceptor — muestra TODO el JSON en Logcat
+    private val logging = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
 
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .client(client)
+    // Cliente HTTP con timeout extendido
+    private val client = OkHttpClient.Builder()
+        .addInterceptor(logging)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    val api: DoctorApiService = retrofit.create(DoctorApiService::class.java)
+    // Retrofit instance
+    val api: DoctorApiService by lazy {
+
+        println("DEBUG → INICIALIZANDO RETROFIT DOCTOR...")
+        println("DEBUG → Base URL: $BASE_URL")
+
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(DoctorApiService::class.java)
+    }
 }

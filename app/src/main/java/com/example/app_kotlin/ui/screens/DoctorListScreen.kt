@@ -25,8 +25,12 @@ fun DoctorListScreen(
     val isLoading = doctorViewModel.isLoading
     val error = doctorViewModel.errorMessage
 
+    println("DEBUG → DoctorListScreen CARGADA, doctorViewModel = $doctorViewModel")
+
     // Ejecutamos la carga una vez
     LaunchedEffect(Unit) {
+        println("DEBUG → Ejecutando fetchDoctors()")
+
         doctorViewModel.fetchDoctors()
     }
 

@@ -1,5 +1,4 @@
-package com.example.app_kotlin.remote
-
+package com.example.app_kotlin.model
 
 data class RandomUserResponse(
     val results: List<RandomUser>
@@ -24,7 +23,5 @@ data class Location(
 )
 
 data class Picture(
-    val large: String,
-    val medium: String,
-    val thumbnail: String
+    val large: String
 )

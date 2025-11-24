@@ -59,8 +59,12 @@ fun AppNavHost() {
                 consultaViewModel = consultaViewModel,
                 onNavigateToAgenda = {
                     navController.navigate(Screens.AGENDA)
+                },
+                onNavigateToDoctorList = {
+                    navController.navigate(Screens.DOCTOR_LIST)
                 }
             )
+
 
         }
 

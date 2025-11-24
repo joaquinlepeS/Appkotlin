@@ -25,7 +25,8 @@ import com.example.app_kotlin.viewmodel.UsuarioViewModel
 fun ConsultaClienteScreen(
     usuarioViewModel: UsuarioViewModel,
     consultaViewModel: ConsultaViewModel,
-    onNavigateToAgenda: () -> Unit
+    onNavigateToAgenda: () -> Unit,
+    onNavigateToDoctorList: () -> Unit      // ✔ nuevo parámetro
 ) {
     val usuarioActual = usuarioViewModel.usuarioActual
     val email = usuarioActual?.email ?: return
@@ -88,6 +89,21 @@ fun ConsultaClienteScreen(
                     color = Color.White.copy(alpha = 0.9f),
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
+
+                // 🌟 BOTÓN BONITO PARA CONOCER AL PERSONAL
+                Button(
+                    onClick = onNavigateToDoctorList,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp),
+                    shape = MaterialTheme.shapes.medium,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary
+                    )
+                ) {
+                    Text("Conoce a nuestro personal")
+                }
 
                 // 📝 Si no hay consultas
                 if (consultas.isEmpty()) {

@@ -9,20 +9,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.app_kotlin.R
+import com.example.app_kotlin.viewmodel.UsuarioViewModel
 import com.example.app_kotlin.utils.validateEmail
 import com.example.app_kotlin.utils.validatePassword
-import com.example.app_kotlin.viewmodel.UsuarioViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,11 +48,19 @@ fun RegistroScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
+        // Fondo completo
         Image(
             painter = painterResource(id = R.drawable.wallpaper),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
+        )
+
+        // Capa oscura sutil
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.35f))
         )
 
         Scaffold(
@@ -62,12 +70,15 @@ fun RegistroScreen(
                     title = {
                         Text(
                             "Crear Cuenta",
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onPrimary
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
                         )
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary
+                        containerColor = Color.Transparent,
+                        titleContentColor = Color.White
                     )
                 )
             }
@@ -76,29 +87,33 @@ fun RegistroScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
-                    .background(Color.Black.copy(alpha = 0.3f)),
+                    .padding(innerPadding),
                 contentAlignment = Alignment.Center
             ) {
 
                 Card(
-                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.onSurfaceVariant),
-                    border = BorderStroke(12.dp, Color.Transparent),
-                    elevation = CardDefaults.cardElevation(24.dp),
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(12.dp),
+                    shape = MaterialTheme.shapes.medium,
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+                    )
                 ) {
 
                     Column(
+                        modifier = Modifier.padding(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                        verticalArrangement = Arrangement.spacedBy(18.dp)
                     ) {
 
                         Text(
                             text = "Crear Cuenta",
-                            fontSize = 26.sp,
+                            fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(vertical = 24.dp),
-                            color = MaterialTheme.colorScheme.onPrimary
+                            color = MaterialTheme.colorScheme.primary
                         )
 
                         // NOMBRE
@@ -110,18 +125,15 @@ fun RegistroScreen(
                             },
                             label = { Text("Nombre completo") },
                             singleLine = true,
-                            modifier = Modifier.padding(3.dp),
+                            modifier = Modifier.fillMaxWidth(),
                         )
-                        if (nombreError != null) {
+                        nombreError?.let {
                             Text(
-                                text = nombreError!!,
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                                text = it,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
                             )
                         }
-
-                        Spacer(modifier = Modifier.height(16.dp))
 
                         // EMAIL
                         OutlinedTextField(
@@ -132,19 +144,16 @@ fun RegistroScreen(
                             },
                             label = { Text("Email") },
                             singleLine = true,
-                            modifier = Modifier.padding(3.dp),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                            modifier = Modifier.fillMaxWidth()
                         )
-                        if (emailError != null) {
+                        emailError?.let {
                             Text(
-                                text = emailError!!,
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                                text = it,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
                             )
                         }
-
-                        Spacer(modifier = Modifier.height(16.dp))
 
                         // PASSWORD
                         OutlinedTextField(
@@ -157,18 +166,17 @@ fun RegistroScreen(
                             singleLine = true,
                             visualTransformation = PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                            modifier = Modifier.padding(3.dp)
+                            modifier = Modifier.fillMaxWidth()
                         )
-                        if (passwordError != null) {
+                        passwordError?.let {
                             Text(
-                                text = passwordError!!,
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                                text = it,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         // BOTÓN REGISTRARSE
                         Button(
@@ -184,18 +192,24 @@ fun RegistroScreen(
                                     usuarioViewModel.registrarUsuario(nombre, email, password)
                                 }
                             },
-                            modifier = Modifier.padding(6.dp),
-                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primaryContainer)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            shape = MaterialTheme.shapes.medium
                         ) {
-                            Text("Registrarse", color = MaterialTheme.colorScheme.onSurface)
+                            Text(
+                                "Registrarse",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        TextButton(onClick = { onNavigateToLogin() }) {
+                        TextButton(
+                            onClick = onNavigateToLogin,
+                        ) {
                             Text(
                                 text = "¿Ya tienes cuenta?",
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -203,10 +217,4 @@ fun RegistroScreen(
             }
         }
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun RegistroScreenPreview() {
-    RegistroScreen(onNavigateToLogin = {})
 }

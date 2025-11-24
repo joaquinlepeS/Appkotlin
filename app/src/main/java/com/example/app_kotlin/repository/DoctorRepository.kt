@@ -1,53 +1,52 @@
 package com.example.app_kotlin.repository
 
 import com.example.app_kotlin.model.Doctor
+import com.example.app_kotlin.remote.RandomUserModels
 import com.example.app_kotlin.remote.RandomUser
-import com.example.app_kotlin.remote.RetrofitClient
 
 class DoctorRepository {
 
-    // Lista de especialidades
-    private val specialties = listOf(
-        "Medicina General",
-        "Cardiología",
-        "Neurología",
-        "Pediatría",
-        "Dermatología",
-        "Geriatría",
-        "Psiquiatría",
-        "Gastroenterología"
-    )
-
-    // Función para generar años de experiencia
-    private fun generateExperience(): Int {
-        return (3..35).random()
-    }
-
-    // Función para generar especialidad
-    private fun generateSpecialty(): String {
-        return specialties.random()
-    }
-
-    // Función principal que obtiene doctores desde la API
-    suspend fun getDoctors(): List<Doctor> {
-        val response = RetrofitClient.api.getDoctors(results = 10)
-
-        return response.results.map { user ->
-            mapRandomUserToDoctor(user)
+    suspend fun fetchDoctors(): List<Doctor> {
+        return try {
+            val response: RandomUserResponse = RandomUserApi.api.getRandomUsers(10)
+            response.results.map { user -> mapRandomUserToDoctor(user) }
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 
-    // Mapeo de RandomUser → Doctor
     private fun mapRandomUserToDoctor(user: RandomUser): Doctor {
         return Doctor(
-            name = "${user.name.first} ${user.name.last}",
+            nombre = "${user.name.first} ${user.name.last}",
             email = user.email,
-            phone = user.phone,
-            picture = user.picture.large,
-            city = user.location.city,
-            country = user.location.country,
-            specialty = generateSpecialty(),
-            yearsExperience = generateExperience()
+            telefono = user.phone,
+            foto = user.picture.large,
+            ciudad = user.location.city,
+            pais = user.location.country,
+            especialidad = generateSpecialty(),
+            experiencia = generateExperience()
         )
     }
-}
+
+    // Genera especialidades al azar para los doctores
+    private fun generateSpecialty(): String {
+        val especialidades = listOf(
+            "Cardiología",
+            "Dermatología",
+            "Pediatría",
+            "Ginecología",
+            "Neurología",
+            "Medicina General",
+            "Traumatología",
+            "Psiquiatría",
+            "Endocrinología",
+            "Otorrinolaringología",
+            "Urología",
+            "Cirugía General",
+            "Oncología"
+        )
+        return especialidades.random()
+    }
+
+    // Genera años de experiencia al azar
+    private fun generateExperience(): Int {

@@ -14,11 +14,19 @@ data class LoginErrors(
 )
 
 data class AgendaErrors(
-    val fechaError: String? = null,
-    val horaError: String? = null,
-    val especialidadError: String? = null,
-    val doctorError: String? = null
-)
+    val fechaError: String?,
+    val horaError: String?,
+    val especialidadError: String?,
+    val doctorError: String?
+) {
+    fun todosNulos(): Boolean {
+        return fechaError == null &&
+                horaError == null &&
+                especialidadError == null &&
+                doctorError == null
+    }
+}
+
 
 // --- VALIDACIONES PARA LOGIN Y REGISTRO ---
 fun validateUsuario(usuario: String): String? {
@@ -28,6 +36,8 @@ fun validateUsuario(usuario: String): String? {
         else -> null
     }
 }
+
+
 
 fun validateEmail(email: String): String? {
     return when {
@@ -106,11 +116,23 @@ fun validateDoctor(doctor: String): String? {
     }
 }
 
-fun validateAgenda(fecha: String, hora: String, especialidad: String, doctor: String): AgendaErrors {
+fun validateAgenda(
+    fecha: String,
+    hora: String,
+    especialidad: String,
+    doctor: String
+): AgendaErrors {
+
+    val fechaError = validateFecha(fecha)
+    val horaError = validateHora(hora)
+    val especialidadError = validateEspecialidad(especialidad)
+    val doctorError = validateDoctor(doctor)
+
     return AgendaErrors(
-        fechaError = validateFecha(fecha),
-        horaError = validateHora(hora),
-        especialidadError = validateEspecialidad(especialidad),
-        doctorError = validateDoctor(doctor)
+        fechaError = fechaError,
+        horaError = horaError,
+        especialidadError = especialidadError,
+        doctorError = doctorError
     )
 }
+

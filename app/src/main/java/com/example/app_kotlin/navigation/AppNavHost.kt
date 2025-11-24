@@ -69,7 +69,6 @@ fun AppNavHost() {
             AgendaScreen(
                 usuarioViewModel = usuarioViewModel,
                 consultaViewModel = consultaViewModel,
-                doctorViewModel = doctorViewModel,
                 onNavigateToConsultaCliente = { navController.navigate(Screens.CONSULTACLIENTE) }
             )
         }

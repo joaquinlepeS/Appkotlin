@@ -65,7 +65,23 @@ fun RegistroScreen(
 
         Scaffold(
             containerColor = Color.Transparent,
-
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            "Crear Cuenta",
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        )
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        titleContentColor = Color.White
+                    )
+                )
+            }
         ) { innerPadding ->
 
             Box(
@@ -76,9 +92,15 @@ fun RegistroScreen(
             ) {
 
                 Card(
-                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(36.dp),
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(12.dp),
+                    shape = MaterialTheme.shapes.medium,
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+                    )
                 ) {
 
                     Column(

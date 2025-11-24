@@ -60,6 +60,31 @@ fun LoginScreen(
 
         Scaffold(
             containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Image(
+                                painter = painterResource(id = R.drawable.baseline_medical_services_24),
+                                contentDescription = "Logo",
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .padding(end = 8.dp)
+                            )
+
+                            Text(
+                                text = "ConsultaMed",
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                )
+            }
         ) { innerPadding ->
 
             Box(

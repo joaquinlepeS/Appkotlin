@@ -1,5 +1,7 @@
 package com.example.app_kotlin.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -11,16 +13,20 @@ import com.example.app_kotlin.model.Doctor
 import com.example.app_kotlin.ui.screens.*
 import com.example.app_kotlin.viewmodel.ConsultaViewModel
 import com.example.app_kotlin.viewmodel.UsuarioViewModel
+import com.example.app_kotlin.viewmodel.DoctorViewModel
 import com.google.gson.Gson
+import java.util.Base64
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavHost() {
 
     val navController = rememberNavController()
 
-    // ViewModels globales
+    // ViewModels globales (se mantienen entre pantallas)
     val usuarioViewModel: UsuarioViewModel = viewModel()
     val consultaViewModel: ConsultaViewModel = viewModel()
+    val doctorViewModel: DoctorViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -69,8 +75,13 @@ fun AppNavHost() {
         // LISTA DE DOCTORES
         composable(Screens.DOCTOR_LIST) {
             DoctorListScreen(
+                doctorViewModel = doctorViewModel,
                 onDoctorSelected = { doctorJson ->
-                    navController.navigate("${Screens.DOCTOR_DETAIL}/$doctorJson")
+
+                    // → protegemos el JSON para que no rompa la navegación
+                    val encoded = Base64.getUrlEncoder().encodeToString(doctorJson.toByteArray())
+
+                    navController.navigate("${Screens.DOCTOR_DETAIL}/$encoded")
                 }
             )
         }
@@ -81,8 +92,9 @@ fun AppNavHost() {
             arguments = listOf(navArgument("doctorJson") { type = NavType.StringType })
         ) { backStackEntry ->
 
-            val doctorJson = backStackEntry.arguments?.getString("doctorJson")!!
-            val doctor = Gson().fromJson(doctorJson, Doctor::class.java)
+            val encoded = backStackEntry.arguments?.getString("doctorJson")!!
+            val decodedJson = String(Base64.getUrlDecoder().decode(encoded))
+            val doctor = Gson().fromJson(decodedJson, Doctor::class.java)
 
             DoctorDetailScreen(
                 doctor = doctor,

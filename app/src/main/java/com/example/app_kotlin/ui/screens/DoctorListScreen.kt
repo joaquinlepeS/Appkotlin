@@ -10,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.app_kotlin.model.Doctor
 import com.example.app_kotlin.viewmodel.DoctorViewModel
@@ -18,27 +17,35 @@ import com.google.gson.Gson
 
 @Composable
 fun DoctorListScreen(
-    onDoctorSelected: (String) -> Unit,   // 🔥 AHORA RECIBE JSON
-    viewModel: DoctorViewModel = viewModel()
+    doctorViewModel: DoctorViewModel,     // ✔ Recibimos el ViewModel global
+    onDoctorSelected: (String) -> Unit
 ) {
-    val doctors = viewModel.doctors
-    val isLoading = viewModel.isLoading
-    val error = viewModel.errorMessage
 
+    val doctors = doctorViewModel.doctors
+    val isLoading = doctorViewModel.isLoading
+    val error = doctorViewModel.errorMessage
+
+    // Ejecutamos la carga una vez
     LaunchedEffect(Unit) {
-        viewModel.fetchDoctors()
+        doctorViewModel.fetchDoctors()
     }
 
     when {
         isLoading -> {
-            Box(Modifier.fillMaxSize(), Alignment.Center) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
                 CircularProgressIndicator()
             }
         }
 
         error != null -> {
-            Box(Modifier.fillMaxSize(), Alignment.Center) {
-                Text(text = "Error: $error")
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Error: $error")
             }
         }
 
@@ -49,13 +56,13 @@ fun DoctorListScreen(
                     .padding(16.dp)
             ) {
                 items(doctors) { doctor ->
+
                     DoctorCard(doctor) {
-
-                        // 🔥 Convertimos el doctor a JSON
+                        // Convertir doctor a JSON
                         val doctorJson = Gson().toJson(doctor)
-
                         onDoctorSelected(doctorJson)
                     }
+
                 }
             }
         }

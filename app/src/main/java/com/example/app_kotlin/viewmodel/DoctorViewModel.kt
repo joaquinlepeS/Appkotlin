@@ -31,7 +31,7 @@ class DoctorViewModel : ViewModel() {
             try {
                 isLoading = true
                 errorMessage = null
-                doctors = repository.getDoctors()
+                doctors = repository.fetchDoctors()
             } catch (e: Exception) {
                 errorMessage = e.message ?: "Error desconocido"
             } finally {

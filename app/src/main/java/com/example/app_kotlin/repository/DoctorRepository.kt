@@ -1,16 +1,23 @@
 package com.example.app_kotlin.repository
 
 import com.example.app_kotlin.model.Doctor
-import com.example.app_kotlin.remote.RandomUserModels
 import com.example.app_kotlin.remote.RandomUser
+import com.example.app_kotlin.remote.RandomUserResponse
+import com.example.app_kotlin.remote.RetrofitClient
 
 class DoctorRepository {
 
     suspend fun fetchDoctors(): List<Doctor> {
         return try {
-            val response: RandomUserResponse = RandomUserApi.api.getRandomUsers(10)
-            response.results.map { user -> mapRandomUserToDoctor(user) }
+            // Usa TU Retrofit real
+            val response: RandomUserResponse = RetrofitClient.api.getDoctors(10)
+
+            response.results.map { user ->
+                mapRandomUserToDoctor(user)
+            }
+
         } catch (e: Exception) {
+            e.printStackTrace()
             emptyList()
         }
     }
@@ -28,7 +35,6 @@ class DoctorRepository {
         )
     }
 
-    // Genera especialidades al azar para los doctores
     private fun generateSpecialty(): String {
         val especialidades = listOf(
             "Cardiología",
@@ -48,5 +54,7 @@ class DoctorRepository {
         return especialidades.random()
     }
 
-    // Genera años de experiencia al azar
     private fun generateExperience(): Int {
+        return (1..30).random()
+    }
+}

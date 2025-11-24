@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.first
 class ConsultaRepository(private val dataStore: DataStoreManager) {
 
     suspend fun agregarConsulta(usuarioEmail: String, consulta: Consulta) {
-        val mapa = dataStore.getConsulta().first().toMutableMap()
+        val mapa = dataStore.getConsulta().first()
+            .mapValues { it.value.toMutableList() }
+            .toMutableMap()
         val lista = mapa.getOrPut(usuarioEmail) { mutableListOf() }
 
         val id = if (lista.isEmpty()) 1 else lista.maxOf { it.id } + 1

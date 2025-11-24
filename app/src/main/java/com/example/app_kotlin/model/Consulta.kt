@@ -1,10 +1,10 @@
 package com.example.app_kotlin.model
 
-data class Consulta(
+data class ConsultaApi(
     val id: Int,
-    val fecha: String,
-    val hora: String,
+    val doctorEmail: String,
+    val doctorNombre: String,
     val especialidad: String,
-    val doctor: String,
-    val paciente: String
+    val fecha: String,
+    val hora: String
 )

@@ -71,7 +71,7 @@ fun DoctorCard(doctor: Doctor, onClick: () -> Unit) {
         Row(modifier = Modifier.padding(16.dp)) {
 
             AsyncImage(
-                model = doctor.picture,
+                model = doctor.foto,
                 contentDescription = "Doctor picture",
                 modifier = Modifier
                     .size(70.dp)
@@ -81,10 +81,10 @@ fun DoctorCard(doctor: Doctor, onClick: () -> Unit) {
 
             Column {
 
-                Text(text = doctor.name, style = MaterialTheme.typography.titleMedium)
-                Text(text = doctor.specialty, style = MaterialTheme.typography.bodyMedium)
-                Text(text = "${doctor.yearsExperience} años de experiencia", style = MaterialTheme.typography.bodySmall)
-                Text(text = "${doctor.city}, ${doctor.country}", style = MaterialTheme.typography.bodySmall)
+                Text(text = doctor.nombre, style = MaterialTheme.typography.titleMedium)
+                Text(text = doctor.especialidad, style = MaterialTheme.typography.bodyMedium)
+                Text(text = "${doctor.experiencia} años de experiencia", style = MaterialTheme.typography.bodySmall)
+                Text(text = "${doctor.ciudad}, ${doctor.pais}", style = MaterialTheme.typography.bodySmall)
             }
         }
     }

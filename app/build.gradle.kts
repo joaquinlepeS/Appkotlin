@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 
+    // KAPT para Room
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -15,7 +17,6 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -28,6 +29,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -41,6 +43,13 @@ android {
 }
 
 dependencies {
+
+    // ROOM
+    implementation("androidx.room:room-runtime:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+
+    // ---------- TU RESTO DE DEPENDENCIAS ----------
     implementation("com.google.code.gson:gson:2.8.5")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0-rc02")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
@@ -48,11 +57,9 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.3")
     implementation("androidx.compose.material3:material3:1.3.1")
     implementation("androidx.compose.material3:material3-window-size-class:1.3.1")
+
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-
-        // tus otras dependencias...
-
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -64,7 +71,6 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("io.coil-kt:coil-compose:2.4.0")
 
     testImplementation(libs.junit)
@@ -74,5 +80,4 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-
 }

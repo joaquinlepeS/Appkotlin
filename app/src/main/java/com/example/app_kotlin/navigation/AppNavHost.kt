@@ -10,7 +10,7 @@ import androidx.navigation.navArgument
 import com.example.app_kotlin.model.Doctor
 import com.example.app_kotlin.ui.screens.*
 import com.example.app_kotlin.viewmodel.ConsultaViewModel
-import com.example.app_kotlin.viewmodel.UsuarioViewModel
+import com.example.app_kotlin.viewmodel.PacienteViewModel
 import com.example.app_kotlin.viewmodel.DoctorViewModel
 import com.google.gson.Gson
 import android.util.Base64   // ✔ Base64 válido para todas las versiones de Android
@@ -21,7 +21,7 @@ fun AppNavHost() {
     val navController = rememberNavController()
 
     // ViewModels globales
-    val usuarioViewModel: UsuarioViewModel = viewModel()
+    val usuarioViewModel: PacienteViewModel = viewModel()
     val consultaViewModel: ConsultaViewModel = viewModel()
     val doctorViewModel: DoctorViewModel = viewModel()
 

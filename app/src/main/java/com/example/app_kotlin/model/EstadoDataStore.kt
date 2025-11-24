@@ -23,17 +23,17 @@ class DataStoreManager(private val context: Context){
     private val DOCTORES_KEY = stringPreferencesKey("doctores")
     private val CONSULTAS_DOCTOR_KEY = stringPreferencesKey("consultas_por_doctor")
 
-    suspend fun saveUsers(users: List<Usuario>){
+    suspend fun saveUsers(users: List<Paciente>){
         val json = gson.toJson(users)
         context.dataStore.edit { prefs ->
             prefs[USERS_KEY] = json
         }
     }
 
-    fun getUsers(): Flow<List<Usuario>>{
+    fun getUsers(): Flow<List<Paciente>>{
         return context.dataStore.data.map { prefs ->
             val json = prefs[USERS_KEY] ?: "[]"
-            val type = object : TypeToken<List<Usuario>>() {}.type
+            val type = object : TypeToken<List<Paciente>>() {}.type
             gson.fromJson(json,type)
         }
     }

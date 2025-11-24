@@ -2,22 +2,22 @@ package com.example.app_kotlin.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.app_kotlin.model.Usuario
-import com.example.app_kotlin.repository.UsuarioRepository
+import com.example.app_kotlin.model.Paciente
+import com.example.app_kotlin.repository.PacienteRepository
 import com.example.app_kotlin.model.DataStoreManager
 import com.example.app_kotlin.App
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.*
 
-class UsuarioViewModel : ViewModel() {
+class PacienteViewModel : ViewModel() {
 
     // ✔ DataStore global usando Application context
     private val dataStore = DataStoreManager(App.context)
 
     // ✔ Repositorio interno (NO requiere constructor externo)
-    private val repo = UsuarioRepository(dataStore)
+    private val repo = PacienteRepository(dataStore)
 
-    var usuarioActual by mutableStateOf<Usuario?>(null)
+    var usuarioActual by mutableStateOf<Paciente?>(null)
         private set
 
     var loginError by mutableStateOf<String?>(null)
@@ -40,7 +40,7 @@ class UsuarioViewModel : ViewModel() {
 
     fun registrarUsuario(nombre: String, email: String, password: String) {
         viewModelScope.launch {
-            val ok = repo.registrarUsuario(Usuario(email, password, nombre))
+            val ok = repo.registrarUsuario(Paciente(email, password, nombre))
             registroExitoso = ok
         }
     }

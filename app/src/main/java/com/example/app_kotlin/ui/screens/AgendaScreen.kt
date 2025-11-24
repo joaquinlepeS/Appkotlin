@@ -12,12 +12,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.app_kotlin.model.Consulta
 import com.example.app_kotlin.viewmodel.ConsultaViewModel
 import com.example.app_kotlin.viewmodel.DoctorViewModel
-import com.example.app_kotlin.viewmodel.UsuarioViewModel
+import com.example.app_kotlin.viewmodel.PacienteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgendaScreen(
-    usuarioViewModel: UsuarioViewModel,
+    usuarioViewModel: PacienteViewModel,
     doctorViewModel: DoctorViewModel,
     consultaViewModel: ConsultaViewModel = viewModel(),
     onNavigateToConsultaCliente: () -> Unit

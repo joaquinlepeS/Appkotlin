@@ -16,4 +16,11 @@ interface PacienteDao {
 
     @Query("SELECT * FROM paciente WHERE id = :id LIMIT 1")
     suspend fun obtenerPacientePorId(id: Int): PacienteEntity?
+
+    @Query("SELECT * FROM paciente")
+    suspend fun obtenerPacientes(): List<PacienteEntity>
+
+    @Query("DELETE FROM paciente")
+    suspend fun eliminarTodos()
+
 }

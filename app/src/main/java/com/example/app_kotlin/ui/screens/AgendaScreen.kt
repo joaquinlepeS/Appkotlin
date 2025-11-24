@@ -3,24 +3,18 @@ package com.example.app_kotlin.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-
 import com.example.app_kotlin.model.Consulta
-import com.example.app_kotlin.viewmodel.UsuarioViewModel
+import com.example.app_kotlin.viewmodel.ConsultaApiViewModel
 import com.example.app_kotlin.viewmodel.ConsultaViewModel
 import com.example.app_kotlin.viewmodel.DoctorViewModel
-
-// Validaciones
-import com.example.app_kotlin.utils.validateFecha
-import com.example.app_kotlin.utils.validateHora
-import com.example.app_kotlin.utils.validateEspecialidad
-import com.example.app_kotlin.utils.validateDoctor
-import com.example.app_kotlin.utils.validateAgenda
-
+import com.example.app_kotlin.viewmodel.UsuarioViewModel
+import com.example.app_kotlin.utils.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,71 +23,47 @@ fun AgendaScreen(
     consultaViewModel: ConsultaViewModel,
     onNavigateToConsultaCliente: () -> Unit
 ) {
-    val context = LocalContext.current
+    // ViewModels externos
+    val doctorViewModel: DoctorViewModel = viewModel()
+    val consultaApiViewModel: ConsultaApiViewModel = viewModel()
 
-    // Doctores API externa
-    val doctorViewModel: DoctorViewModel = viewModel ()
-    val doctores = doctorViewModel.doctors
-
-    LaunchedEffect (Unit) {
+    // Cargar doctores al entrar
+    LaunchedEffect(Unit) {
         doctorViewModel.fetchDoctors()
     }
 
-    // Campos del formulario
-    var fecha by remember  { mutableStateOf("") }
-    var hora by remember { mutableStateOf("") }
+    // STATES
     var especialidad by remember { mutableStateOf("") }
     var doctorSeleccionado by remember { mutableStateOf("") }
+    var fecha by remember { mutableStateOf("") }
+    var hora by remember { mutableStateOf("") }
 
     var expandedEspecialidad by remember { mutableStateOf(false) }
     var expandedDoctor by remember { mutableStateOf(false) }
+    var expandedHora by remember { mutableStateOf(false) }
 
-    // Errores
-    var fechaError by remember { mutableStateOf<String?>(null) }
-    var horaError by remember { mutableStateOf<String?>(null) }
+    // ERRORES
     var especialidadError by remember { mutableStateOf<String?>(null) }
     var doctorError by remember { mutableStateOf<String?>(null) }
+    var horaError by remember { mutableStateOf<String?>(null) }
 
-    // Listas
+    // LISTAS de doctores
+    val doctores = doctorViewModel.doctors
     val especialidades = doctores.map { it.especialidad }.distinct()
     val doctoresFiltrados = doctores.filter { it.especialidad == especialidad }
 
-    Column (
+    // HORAS DISPONIBLES desde API
+    val horasDisponibles = consultaApiViewModel.consultas
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Text(
-            text = "Agendar Consulta",
-            style = MaterialTheme.typography.headlineSmall
-        )
+        Text("Agendar Consulta", style = MaterialTheme.typography.headlineSmall)
 
-        // FECHA
-        OutlinedTextField(
-            value = fecha,
-            onValueChange = {
-                fecha = it
-                fechaError = validateFecha(fecha)
-            },
-            label = { Text("Fecha (ej: 2025-10-20)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        if (fechaError != null) Text(fechaError!!, color = MaterialTheme.colorScheme.error)
-
-        // HORA
-        OutlinedTextField(
-            value = hora,
-            onValueChange = {
-                hora = it
-                horaError = validateHora(hora)
-            },
-            label = { Text("Hora (ej: 15:30)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        if (horaError != null) Text(horaError!!, color = MaterialTheme.colorScheme.error)
-
-        // ESPECIALIDAD
+        // 🔵 ESPECIALIDAD
         ExposedDropdownMenuBox(
             expanded = expandedEspecialidad,
             onExpandedChange = { expandedEspecialidad = !expandedEspecialidad }
@@ -103,7 +73,7 @@ fun AgendaScreen(
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Especialidad") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEspecialidad) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedEspecialidad) },
                 modifier = Modifier
                     .menuAnchor()
                     .fillMaxWidth()
@@ -119,7 +89,10 @@ fun AgendaScreen(
                         onClick = {
                             especialidad = esp
                             doctorSeleccionado = ""
+                            fecha = ""
+                            hora = ""
                             expandedEspecialidad = false
+                            especialidadError = validateEspecialidad(especialidad)
                         }
                     )
                 }
@@ -127,7 +100,7 @@ fun AgendaScreen(
         }
         if (especialidadError != null) Text(especialidadError!!, color = MaterialTheme.colorScheme.error)
 
-        // DOCTORES FILTRADOS
+        // 🔵 DOCTOR
         ExposedDropdownMenuBox(
             expanded = expandedDoctor,
             onExpandedChange = { expandedDoctor = !expandedDoctor }
@@ -137,11 +110,14 @@ fun AgendaScreen(
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Doctor") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDoctor) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedDoctor) },
                 modifier = Modifier
                     .menuAnchor()
                     .fillMaxWidth()
-                    .clickable { if (especialidad.isNotBlank()) expandedDoctor = true }
+                    .clickable {
+                        if (especialidad.isNotBlank()) expandedDoctor = true
+                    },
+                enabled = especialidad.isNotBlank()
             )
             ExposedDropdownMenu(
                 expanded = expandedDoctor,
@@ -153,6 +129,10 @@ fun AgendaScreen(
                         onClick = {
                             doctorSeleccionado = doctor.nombre
                             expandedDoctor = false
+                            doctorError = validateDoctor(doctorSeleccionado)
+
+                            // CARGAR HORAS DESDE API
+                            consultaApiViewModel.cargarConsultasPorDoctor(doctor.email)
                         }
                     )
                 }
@@ -160,18 +140,55 @@ fun AgendaScreen(
         }
         if (doctorError != null) Text(doctorError!!, color = MaterialTheme.colorScheme.error)
 
-        // BOTÓN CONFIRMAR
+        // 🔵 HORAS DISPONIBLES DESDE API
+        ExposedDropdownMenuBox(
+            expanded = expandedHora,
+            onExpandedChange = { expandedHora = !expandedHora }
+        ) {
+            OutlinedTextField(
+                value = hora,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Hora Disponible") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedHora) },
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
+                    .clickable {
+                        if (consultaApiViewModel.consultas.isNotEmpty())
+                            expandedHora = true
+                    },
+                enabled = doctorSeleccionado.isNotBlank()
+            )
+            ExposedDropdownMenu(
+                expanded = expandedHora,
+                onDismissRequest = { expandedHora = false }
+            ) {
+                horasDisponibles.forEach { consulta ->
+                    DropdownMenuItem(
+                        text = { Text("${consulta.fecha} - ${consulta.hora}") },
+                        onClick = {
+                            fecha = consulta.fecha
+                            hora = consulta.hora
+                            expandedHora = false
+                            horaError = validateHora(hora)
+                        }
+                    )
+                }
+            }
+        }
+        if (horaError != null) Text(horaError!!, color = MaterialTheme.colorScheme.error)
+
+        // 🔵 BOTÓN CONFIRMAR
         Button(
             onClick = {
+                // Validaciones
                 val errors = validateAgenda(fecha, hora, especialidad, doctorSeleccionado)
-
-                fechaError = errors.fechaError
-                horaError = errors.horaError
                 especialidadError = errors.especialidadError
                 doctorError = errors.doctorError
+                horaError = errors.horaError
 
                 if (errors.todosNulos()) {
-
                     val consulta = Consulta(
                         id = 0,
                         fecha = fecha,
@@ -181,10 +198,7 @@ fun AgendaScreen(
                         paciente = usuarioViewModel.usuarioActual!!.nombre
                     )
 
-                    consultaViewModel.agregarConsulta(
-                        usuarioEmail = usuarioViewModel.usuarioActual!!.email,
-                        consulta = consulta
-                    )
+                    consultaViewModel.agregarConsulta(usuarioViewModel.usuarioActual!!.email, consulta)
 
                     onNavigateToConsultaCliente()
                 }

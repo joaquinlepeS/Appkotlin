@@ -5,17 +5,19 @@ import com.example.app_kotlin.remote.RetrofitClientConsulta
 
 class ConsultaApiRepository {
 
-    suspend fun obtenerConsultas(): List<ConsultaApi> {
+    suspend fun getAllConsultas(): List<ConsultaApi> {
         return try {
-            RetrofitClientConsulta.api.obtenerConsultas()
+            RetrofitClientConsulta.api.getConsultas()
         } catch (e: Exception) {
-            e.printStackTrace()
             emptyList()
         }
     }
 
-    suspend fun obtenerConsultasPorDoctor(email: String): List<ConsultaApi> {
-        val lista = obtenerConsultas()
-        return lista.filter { it.doctorEmail == email }
+    suspend fun getConsultasPorDoctor(doctorId: String): List<ConsultaApi> {
+        return try {
+            RetrofitClientConsulta.api.getConsultasPorDoctor(doctorId)
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 }

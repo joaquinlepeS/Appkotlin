@@ -4,32 +4,50 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.app_kotlin.model.ConsultaApi
 import com.example.app_kotlin.repository.ConsultaApiRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.*
 
 class ConsultaApiViewModel : ViewModel() {
 
     private val repository = ConsultaApiRepository()
 
-    var consultas by mutableStateOf<List<ConsultaApi>>(emptyList())
-        private set
+    private val _consultas = MutableStateFlow<List<ConsultaApi>>(emptyList())
+    val consultas: StateFlow<List<ConsultaApi>> = _consultas
 
-    var isLoading by mutableStateOf(false)
-        private set
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
-    var error by mutableStateOf<String?>(null)
-        private set
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
 
-    fun cargarConsultasPorDoctor(email: String) {
+
+    /** 🔵 Obtener TODAS las consultas de la API */
+    fun cargarTodasLasConsultas() {
         viewModelScope.launch {
             try {
-                isLoading = true
-                error = null
-                consultas = repository.obtenerConsultasPorDoctor(email)
+                _isLoading.value = true
+                _error.value = null
+                _consultas.value = repository.getAllConsultas()
             } catch (e: Exception) {
-                error = e.message
+                _error.value = e.message
             } finally {
-                isLoading = false
+                _isLoading.value = false
+            }
+        }
+    }
+
+    /** 🔵 Obtener consultas SOLO para un doctor */
+    fun cargarConsultasPorDoctor(doctorId: String) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                _error.value = null
+                _consultas.value = repository.getConsultasPorDoctor(doctorId)
+            } catch (e: Exception) {
+                _error.value = e.message
+            } finally {
+                _isLoading.value = false
             }
         }
     }

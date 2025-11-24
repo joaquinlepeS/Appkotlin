@@ -1,17 +1,25 @@
 package com.example.app_kotlin.ui.screens
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.app_kotlin.R
 import com.example.app_kotlin.model.Consulta
-import com.example.app_kotlin.viewmodel.ConsultaViewModel
 import com.example.app_kotlin.viewmodel.ConsultaApiViewModel
+import com.example.app_kotlin.viewmodel.ConsultaViewModel
 import com.example.app_kotlin.viewmodel.DoctorViewModel
 import com.example.app_kotlin.viewmodel.UsuarioViewModel
 
@@ -20,23 +28,18 @@ import com.example.app_kotlin.viewmodel.UsuarioViewModel
 fun AgendaScreen(
     usuarioViewModel: UsuarioViewModel,
     doctorViewModel: DoctorViewModel,
-    consultaViewModel: ConsultaViewModel = viewModel(),
-    consultaApiViewModel: ConsultaApiViewModel = viewModel(),
+    consultaViewModel: ConsultaViewModel,
+    consultaApiViewModel: ConsultaApiViewModel,
     onNavigateToConsultaCliente: () -> Unit
 ) {
-    val doctorViewModel: DoctorViewModel = viewModel()
 
-    // 🔵 Cargar API doctores + consultas globales
+    // Cargar datos al entrar
     LaunchedEffect(Unit) {
         doctorViewModel.fetchDoctors()
-        val user = usuarioViewModel.usuarioActual
-        if (user != null) {
-            consultaViewModel.cargarConsultas(user.email)
-        }
-
+        consultaApiViewModel.cargarConsultasPorDoctor("")
     }
 
-    // Estados de formulario
+    // Estados UI
     var especialidad by remember { mutableStateOf("") }
     var doctorSeleccionado by remember { mutableStateOf("") }
     var hora by remember { mutableStateOf("") }
@@ -45,173 +48,217 @@ fun AgendaScreen(
     var expandedDoctor by remember { mutableStateOf(false) }
     var expandedHora by remember { mutableStateOf(false) }
 
-    // Listados
     val doctores = doctorViewModel.doctors
+    val consultasApi = consultaApiViewModel.consultas
+
     val especialidades = doctores.map { it.especialidad }.distinct()
     val doctoresFiltrados = doctores.filter { it.especialidad == especialidad }
 
-    // 🔥 Consultas globales (para detectar horas ocupadas)
-    val consultasApi = consultaApiViewModel.consultas
-
-    // Horario base generado
+    // Horas base
     val horarioBase = listOf(
-        "09:00", "09:30", "10:00", "10:30",
-        "11:00", "11:30", "12:00",
-        "14:00", "14:30", "15:00",
-        "15:30", "16:00", "16:30"
+        "09:00","09:30","10:00","10:30",
+        "11:00","11:30","12:00",
+        "14:00","14:30","15:00",
+        "15:30","16:00","16:30"
     )
 
-    // 🔥 Filtrar horas ya ocupadas por este doctor
-    val consultasDoctor = consultasApi.filter { it.doctorEmail == doctorSeleccionado }
-    val horasOcupadas = consultasDoctor.map { it.hora }
-    val horasDisponibles = horarioBase.filter { it !in horasOcupadas }
+    // Ocupadas por ese doctor
+    val consultasDelDoctor = consultasApi.filter { it.doctorEmail == doctorSeleccionado }
+    val horasDisponibles = horarioBase.filter { h ->
+        consultasDelDoctor.none { it.hora == h }
+    }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        Text("Agendar Consulta", style = MaterialTheme.typography.headlineSmall)
+    // ----------------------------------------
+    //                UI
+    // ----------------------------------------
+    Box(modifier = Modifier.fillMaxSize()) {
 
-        // -------------------------
-        // ESPECIALIDAD
-        // -------------------------
-        ExposedDropdownMenuBox(
-            expanded = expandedEspecialidad,
-            onExpandedChange = { expandedEspecialidad = !expandedEspecialidad }
+        // Fondo
+        Image(
+            painter = painterResource(R.drawable.wallpaper),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        // Capa oscura
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.35f))
+        )
+
+        // Contenido principal
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            OutlinedTextField(
-                value = especialidad,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Especialidad") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedEspecialidad) },
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth()
-                    .clickable { expandedEspecialidad = true }
-            )
 
-            ExposedDropdownMenu(
-                expanded = expandedEspecialidad,
-                onDismissRequest = { expandedEspecialidad = false }
+            Card(
+                colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(36.dp),
+                modifier = Modifier.padding(16.dp)
             ) {
-                especialidades.forEach { esp ->
-                    DropdownMenuItem(
-                        text = { Text(esp) },
-                        onClick = {
-                            especialidad = esp
-                            doctorSeleccionado = ""
-                            hora = ""
-                            expandedEspecialidad = false
-                        }
+
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+
+                    Text(
+                        "Agendar Consulta",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = Color.Black
                     )
+
+                    // ==========================
+                    // ESPECIALIDAD
+                    // ==========================
+                    ExposedDropdownMenuBox(
+                        expanded = expandedEspecialidad,
+                        onExpandedChange = { expandedEspecialidad = !expandedEspecialidad }
+                    ) {
+                        OutlinedTextField(
+                            value = especialidad,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Especialidad") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedEspecialidad) },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
+                                .clickable { expandedEspecialidad = true }
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = expandedEspecialidad,
+                            onDismissRequest = { expandedEspecialidad = false }
+                        ) {
+                            especialidades.forEach { esp ->
+                                DropdownMenuItem(
+                                    text = { Text(esp) },
+                                    onClick = {
+                                        especialidad = esp
+                                        doctorSeleccionado = ""
+                                        hora = ""
+                                        expandedEspecialidad = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // ==========================
+                    // DOCTOR
+                    // ==========================
+                    ExposedDropdownMenuBox(
+                        expanded = expandedDoctor,
+                        onExpandedChange = { expandedDoctor = !expandedDoctor }
+                    ) {
+                        OutlinedTextField(
+                            value = doctorSeleccionado,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Doctor") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedDoctor) },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
+                                .clickable { expandedDoctor = true }
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = expandedDoctor,
+                            onDismissRequest = { expandedDoctor = false }
+                        ) {
+                            doctoresFiltrados.forEach { doc ->
+                                DropdownMenuItem(
+                                    text = { Text("${doc.nombre}") },
+                                    onClick = {
+                                        doctorSeleccionado = doc.email
+                                        hora = ""
+                                        expandedDoctor = false
+                                        consultaApiViewModel.cargarConsultasPorDoctor(doc.email)
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // ==========================
+                    // HORAS DISPONIBLES
+                    // ==========================
+                    ExposedDropdownMenuBox(
+                        expanded = expandedHora,
+                        onExpandedChange = { expandedHora = !expandedHora }
+                    ) {
+                        OutlinedTextField(
+                            value = hora,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Hora disponible") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedHora) },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
+                                .clickable { expandedHora = true }
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = expandedHora,
+                            onDismissRequest = { expandedHora = false }
+                        ) {
+                            horasDisponibles.forEach { h ->
+                                DropdownMenuItem(
+                                    text = { Text(h) },
+                                    onClick = {
+                                        hora = h
+                                        expandedHora = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // ==========================
+                    // CONFIRMAR
+                    // ==========================
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = especialidad.isNotEmpty()
+                                && doctorSeleccionado.isNotEmpty()
+                                && hora.isNotEmpty(),
+                        onClick = {
+                            val user = usuarioViewModel.usuarioActual ?: return@Button
+
+                            val nombreDoctor = doctores.firstOrNull { it.email == doctorSeleccionado }
+                                ?.let { "${it.nombre}" }
+                                ?: "Doctor"
+
+                            consultaViewModel.agregarConsulta(
+                                user.email,
+                                Consulta(
+                                    id = 0,
+                                    fecha = "2025-11-24",
+                                    hora = hora,
+                                    especialidad = especialidad,
+                                    doctor = nombreDoctor,
+                                    paciente = user.nombre
+                                )
+                            )
+
+                            onNavigateToConsultaCliente()
+                        }
+                    ) {
+                        Text("Confirmar Consulta")
+                    }
                 }
             }
         }
-
-        // -------------------------
-        // DOCTOR
-        // -------------------------
-        ExposedDropdownMenuBox(
-            expanded = expandedDoctor,
-            onExpandedChange = { expandedDoctor = !expandedDoctor }
-        ) {
-            OutlinedTextField(
-                value = doctorSeleccionado,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Doctor") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedDoctor) },
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth()
-                    .clickable { expandedDoctor = true }
-            )
-
-            ExposedDropdownMenu(
-                expanded = expandedDoctor,
-                onDismissRequest = { expandedDoctor = false }
-            ) {
-                doctoresFiltrados.forEach { doc ->
-                    DropdownMenuItem(
-                        text = { Text(doc.nombre) },
-                        onClick = {
-                            doctorSeleccionado = doc.email
-                            hora = ""
-                            expandedDoctor = false
-                        }
-                    )
-                }
-            }
-        }
-
-        // -------------------------
-        // HORA DISPONIBLE
-        // -------------------------
-        ExposedDropdownMenuBox(
-            expanded = expandedHora,
-            onExpandedChange = { expandedHora = !expandedHora }
-        ) {
-            OutlinedTextField(
-                value = hora,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Hora Disponible") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedHora) },
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth()
-                    .clickable { expandedHora = true }
-            )
-
-            ExposedDropdownMenu(
-                expanded = expandedHora,
-                onDismissRequest = { expandedHora = false }
-            ) {
-                horasDisponibles.forEach { h ->
-                    DropdownMenuItem(
-                        text = { Text(h) },
-                        onClick = {
-                            hora = h
-                            expandedHora = false
-                        }
-                    )
-                }
-            }
-        }
-
-        // -------------------------
-        // CONFIRMAR CONSULTA
-        // -------------------------
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = {
-                val user = usuarioViewModel.usuarioActual ?: return@Button
-
-                // Encontrar doctor por email
-                val doctorNombre = doctoresFiltrados
-                    .firstOrNull { it.email == doctorSeleccionado }
-                    ?.nombre ?: "Doctor desconocido"
-
-                consultaViewModel.agregarConsulta(
-                    user.email,
-                    Consulta(
-                        id = 0,
-                        fecha = "2025-11-24",   // luego pondremos DatePicker
-                        hora = hora,
-                        especialidad = especialidad,
-                        doctor = doctorNombre,       // ✔ AHORA SE GUARDA EL NOMBRE
-                        paciente = user.nombre       // ✔ AHORA SE GUARDA EL NOMBRE DEL PACIENTE
-                    )
-                )
-
-                onNavigateToConsultaCliente()
-            }
-        ) {
-            Text("Confirmar Consulta")
-        }
-
     }
 }

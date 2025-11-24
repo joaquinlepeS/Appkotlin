@@ -6,4 +6,7 @@ object Screens {
     const val CONSULTACLIENTE = "consultacliente"
     const val AGENDA = "agenda"
     const val CONSULTADOCTOR = "consultadoctor"
+    const val DOCTOR_LIST = "doctor_list"
+    const val DOCTOR_DETAIL = "doctor_detail"
+
 }

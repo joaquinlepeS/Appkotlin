@@ -1,10 +1,5 @@
 package com.example.app_kotlin.ui.screens
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -12,20 +7,40 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import com.example.app_kotlin.model.AppState
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 import com.example.app_kotlin.model.Consulta
-import com.example.app_kotlin.utils.*
+import com.example.app_kotlin.viewmodel.UsuarioViewModel
+import com.example.app_kotlin.viewmodel.ConsultaViewModel
+import com.example.app_kotlin.viewmodel.DoctorViewModel
+
+// Validaciones
+import com.example.app_kotlin.utils.validateFecha
+import com.example.app_kotlin.utils.validateHora
+import com.example.app_kotlin.utils.validateEspecialidad
+import com.example.app_kotlin.utils.validateDoctor
+import com.example.app_kotlin.utils.validateAgenda
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgendaScreen(
-    onNavigateToConsultaCliente: () -> Unit,
-    appState: AppState
+    usuarioViewModel: UsuarioViewModel,
+    consultaViewModel: ConsultaViewModel,
+    onNavigateToConsultaCliente: () -> Unit
 ) {
     val context = LocalContext.current
 
-    var fecha by remember { mutableStateOf("") }
+    // Doctores API externa
+    val doctorViewModel: DoctorViewModel = viewModel ()
+    val doctores = doctorViewModel.doctors
+
+    LaunchedEffect (Unit) {
+        doctorViewModel.fetchDoctors()
+    }
+
+    // Campos del formulario
+    var fecha by remember  { mutableStateOf("") }
     var hora by remember { mutableStateOf("") }
     var especialidad by remember { mutableStateOf("") }
     var doctorSeleccionado by remember { mutableStateOf("") }
@@ -33,35 +48,17 @@ fun AgendaScreen(
     var expandedEspecialidad by remember { mutableStateOf(false) }
     var expandedDoctor by remember { mutableStateOf(false) }
 
+    // Errores
     var fechaError by remember { mutableStateOf<String?>(null) }
     var horaError by remember { mutableStateOf<String?>(null) }
     var especialidadError by remember { mutableStateOf<String?>(null) }
     var doctorError by remember { mutableStateOf<String?>(null) }
 
-    val doctores = appState.doctores
+    // Listas
     val especialidades = doctores.map { it.especialidad }.distinct()
     val doctoresFiltrados = doctores.filter { it.especialidad == especialidad }
 
-    // --- Permiso de notificación ---
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        // No hacemos nada extra aquí, solo pedimos permiso
-    }
-
-    LaunchedEffect(Unit) {
-        val permissionGranted = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.POST_NOTIFICATIONS
-        ) == PackageManager.PERMISSION_GRANTED
-
-        if (!permissionGranted) {
-            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-    }
-
-    // --- Aquí sigue exactamente todo tu código existente ---
-    Column(
+    Column (
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
@@ -72,6 +69,7 @@ fun AgendaScreen(
             style = MaterialTheme.typography.headlineSmall
         )
 
+        // FECHA
         OutlinedTextField(
             value = fecha,
             onValueChange = {
@@ -81,8 +79,9 @@ fun AgendaScreen(
             label = { Text("Fecha (ej: 2025-10-20)") },
             modifier = Modifier.fillMaxWidth()
         )
-        if (fechaError != null) Text(fechaError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        if (fechaError != null) Text(fechaError!!, color = MaterialTheme.colorScheme.error)
 
+        // HORA
         OutlinedTextField(
             value = hora,
             onValueChange = {
@@ -92,8 +91,9 @@ fun AgendaScreen(
             label = { Text("Hora (ej: 15:30)") },
             modifier = Modifier.fillMaxWidth()
         )
-        if (horaError != null) Text(horaError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        if (horaError != null) Text(horaError!!, color = MaterialTheme.colorScheme.error)
 
+        // ESPECIALIDAD
         ExposedDropdownMenuBox(
             expanded = expandedEspecialidad,
             onExpandedChange = { expandedEspecialidad = !expandedEspecialidad }
@@ -102,7 +102,7 @@ fun AgendaScreen(
                 value = especialidad,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Seleccionar especialidad") },
+                label = { Text("Especialidad") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEspecialidad) },
                 modifier = Modifier
                     .menuAnchor()
@@ -118,16 +118,16 @@ fun AgendaScreen(
                         text = { Text(esp) },
                         onClick = {
                             especialidad = esp
-                            expandedEspecialidad = false
                             doctorSeleccionado = ""
-                            especialidadError = validateEspecialidad(especialidad)
+                            expandedEspecialidad = false
                         }
                     )
                 }
             }
         }
-        if (especialidadError != null) Text(especialidadError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        if (especialidadError != null) Text(especialidadError!!, color = MaterialTheme.colorScheme.error)
 
+        // DOCTORES FILTRADOS
         ExposedDropdownMenuBox(
             expanded = expandedDoctor,
             onExpandedChange = { expandedDoctor = !expandedDoctor }
@@ -136,13 +136,12 @@ fun AgendaScreen(
                 value = doctorSeleccionado,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Seleccionar Doctor") },
+                label = { Text("Doctor") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDoctor) },
                 modifier = Modifier
                     .menuAnchor()
                     .fillMaxWidth()
-                    .clickable { if (especialidad.isNotBlank()) expandedDoctor = true },
-                enabled = especialidad.isNotBlank()
+                    .clickable { if (especialidad.isNotBlank()) expandedDoctor = true }
             )
             ExposedDropdownMenu(
                 expanded = expandedDoctor,
@@ -154,44 +153,38 @@ fun AgendaScreen(
                         onClick = {
                             doctorSeleccionado = doctor.nombre
                             expandedDoctor = false
-                            doctorError = validateDoctor(doctorSeleccionado)
                         }
                     )
                 }
             }
         }
-        if (doctorError != null) Text(doctorError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        if (doctorError != null) Text(doctorError!!, color = MaterialTheme.colorScheme.error)
 
+        // BOTÓN CONFIRMAR
         Button(
             onClick = {
                 val errors = validateAgenda(fecha, hora, especialidad, doctorSeleccionado)
+
                 fechaError = errors.fechaError
                 horaError = errors.horaError
                 especialidadError = errors.especialidadError
                 doctorError = errors.doctorError
 
-                if (fechaError == null && horaError == null && especialidadError == null && doctorError == null) {
-                    val nuevaConsulta = Consulta(
+                if (errors.todosNulos()) {
+
+                    val consulta = Consulta(
                         id = 0,
                         fecha = fecha,
                         hora = hora,
                         especialidad = especialidad,
                         doctor = doctorSeleccionado,
-                        paciente = appState.usuarioActual?.nombre ?: "Desconocido"
+                        paciente = usuarioViewModel.usuarioActual!!.nombre
                     )
-                    appState.agregarConsulta(nuevaConsulta)
 
-                    // --- Notificación ---
-                    val permissionGranted = ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.POST_NOTIFICATIONS
-                    ) == PackageManager.PERMISSION_GRANTED
-                    if (permissionGranted) {
-                        showAgendaNotification(
-                            context,
-                            "Consulta con $doctorSeleccionado el $fecha a las $hora"
-                        )
-                    }
+                    consultaViewModel.agregarConsulta(
+                        usuarioEmail = usuarioViewModel.usuarioActual!!.email,
+                        consulta = consulta
+                    )
 
                     onNavigateToConsultaCliente()
                 }
@@ -200,14 +193,6 @@ fun AgendaScreen(
             enabled = doctores.isNotEmpty()
         ) {
             Text("Confirmar")
-        }
-
-        if (doctores.isEmpty()) {
-            Text(
-                text = "No hay doctores registrados aún.",
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-                modifier = Modifier.padding(top = 8.dp)
-            )
         }
     }
 }

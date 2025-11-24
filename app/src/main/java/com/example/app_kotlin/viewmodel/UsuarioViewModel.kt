@@ -4,10 +4,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.app_kotlin.model.Usuario
 import com.example.app_kotlin.repository.UsuarioRepository
+import com.example.app_kotlin.model.DataStoreManager
+import com.example.app_kotlin.App
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.*
 
-class UsuarioViewModel(private val repo: UsuarioRepository) : ViewModel() {
+class UsuarioViewModel : ViewModel() {
+
+    // ✔ DataStore global usando Application context
+    private val dataStore = DataStoreManager(App.context)
+
+    // ✔ Repositorio interno (NO requiere constructor externo)
+    private val repo = UsuarioRepository(dataStore)
 
     var usuarioActual by mutableStateOf<Usuario?>(null)
         private set

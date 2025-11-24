@@ -1,7 +1,5 @@
 package com.example.app_kotlin.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -16,19 +14,18 @@ import com.example.app_kotlin.viewmodel.UsuarioViewModel
 import com.example.app_kotlin.viewmodel.DoctorViewModel
 import com.example.app_kotlin.viewmodel.ConsultaApiViewModel
 import com.google.gson.Gson
-import java.util.Base64
+import android.util.Base64   // ✔ Base64 válido para todas las versiones de Android
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavHost() {
 
     val navController = rememberNavController()
 
-    // ViewModels globales (se mantienen entre pantallas)
+    // ViewModels globales
     val usuarioViewModel: UsuarioViewModel = viewModel()
     val consultaViewModel: ConsultaViewModel = viewModel()
     val doctorViewModel: DoctorViewModel = viewModel()
-    val consultaApiViewModel: ConsultaApiViewModel = viewModel()   // ✔ AGREGADO
+    val consultaApiViewModel: ConsultaApiViewModel = viewModel()   // ✔ ya agregado anteriormente
 
     NavHost(
         navController = navController,
@@ -63,13 +60,13 @@ fun AppNavHost() {
             )
         }
 
-        // AGENDA  ✔ PASAMOS VIEWMODELS GLOBALMENTE
+        // AGENDA
         composable(Screens.AGENDA) {
             AgendaScreen(
                 usuarioViewModel = usuarioViewModel,
                 consultaViewModel = consultaViewModel,
-                doctorViewModel = doctorViewModel,                // ✔ AGREGADO
-                consultaApiViewModel = consultaApiViewModel,      // ✔ AGREGADO
+                doctorViewModel = doctorViewModel,
+                consultaApiViewModel = consultaApiViewModel,
                 onNavigateToConsultaCliente = {
                     navController.navigate(Screens.CONSULTACLIENTE)
                 }
@@ -82,7 +79,11 @@ fun AppNavHost() {
                 doctorViewModel = doctorViewModel,
                 onDoctorSelected = { doctorJson ->
 
-                    val encoded = Base64.getUrlEncoder().encodeToString(doctorJson.toByteArray())
+                    // ✔ Base64 compatible para todas las APIs
+                    val encoded = Base64.encodeToString(
+                        doctorJson.toByteArray(),
+                        Base64.URL_SAFE or Base64.NO_WRAP
+                    )
 
                     navController.navigate("${Screens.DOCTOR_DETAIL}/$encoded")
                 }
@@ -96,7 +97,11 @@ fun AppNavHost() {
         ) { backStackEntry ->
 
             val encoded = backStackEntry.arguments?.getString("doctorJson")!!
-            val decodedJson = String(Base64.getUrlDecoder().decode(encoded))
+
+            // ✔ Decodificación segura
+            val decodedBytes = Base64.decode(encoded, Base64.URL_SAFE or Base64.NO_WRAP)
+            val decodedJson = String(decodedBytes)
+
             val doctor = Gson().fromJson(decodedJson, Doctor::class.java)
 
             DoctorDetailScreen(

@@ -30,6 +30,7 @@ fun AppNavHost() {
         // LOGIN
         composable(Screens.LOGIN) {
             LoginScreen(
+                usuarioViewModel = usuarioViewModel,
                 onNavigateToRegistro = { navController.navigate(Screens.REGISTER) },
                 onNavigateToConsultaCliente = {
                     navController.navigate(Screens.CONSULTACLIENTE) {

@@ -1,6 +1,5 @@
 package com.example.app_kotlin.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,17 +14,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.app_kotlin.model.Doctor
 import com.example.app_kotlin.viewmodel.DoctorViewModel
+import com.google.gson.Gson
 
 @Composable
 fun DoctorListScreen(
-    onDoctorSelected: (Doctor) -> Unit,
+    onDoctorSelected: (String) -> Unit,   // 🔥 AHORA RECIBE JSON
     viewModel: DoctorViewModel = viewModel()
 ) {
     val doctors = viewModel.doctors
     val isLoading = viewModel.isLoading
     val error = viewModel.errorMessage
 
-    // Ejecutar fetchDoctors() solo UNA vez
     LaunchedEffect(Unit) {
         viewModel.fetchDoctors()
     }
@@ -51,7 +50,11 @@ fun DoctorListScreen(
             ) {
                 items(doctors) { doctor ->
                     DoctorCard(doctor) {
-                        onDoctorSelected(doctor)
+
+                        // 🔥 Convertimos el doctor a JSON
+                        val doctorJson = Gson().toJson(doctor)
+
+                        onDoctorSelected(doctorJson)
                     }
                 }
             }

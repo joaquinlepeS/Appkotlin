@@ -4,31 +4,34 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.app_kotlin.model.Consulta
 import com.example.app_kotlin.repository.ConsultaRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.*
 
-class ConsultaViewModel(private val repo: ConsultaRepository) : ViewModel() {
+class ConsultaViewModel(
+    private val repository: ConsultaRepository
+) : ViewModel() {
 
-    var consultas by mutableStateOf<List<Consulta>>(emptyList())
-        private set
+    private val _consultas = MutableStateFlow<List<Consulta>>(emptyList())
+    val consultas: StateFlow<List<Consulta>> = _consultas
 
-    fun cargarConsultas(usuarioEmail: String) {
+    fun cargarConsultas(email: String) {
         viewModelScope.launch {
-            consultas = repo.obtenerConsultas(usuarioEmail)
+            _consultas.value = repository.obtenerConsultas(email)
         }
     }
 
-    fun agregarConsulta(usuarioEmail: String, consulta: Consulta) {
+    fun agregarConsulta(email: String, consulta: Consulta) {
         viewModelScope.launch {
-            repo.agregarConsulta(usuarioEmail, consulta)
-            cargarConsultas(usuarioEmail)
+            repository.agregarConsulta(email, consulta)
+            cargarConsultas(email) // actualiza lista
         }
     }
 
-    fun eliminarConsulta(usuarioEmail: String, id: Int) {
+    fun eliminarConsulta(email: String, id: Int) {
         viewModelScope.launch {
-            repo.eliminarConsulta(usuarioEmail, id)
-            cargarConsultas(usuarioEmail)
+            repository.eliminarConsulta(email, id)
+            cargarConsultas(email) // actualiza lista
         }
     }
 }

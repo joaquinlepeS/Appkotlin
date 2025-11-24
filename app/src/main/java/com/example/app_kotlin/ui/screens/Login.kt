@@ -29,11 +29,10 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
+    usuarioViewModel: UsuarioViewModel,   // 🔥 Se recibe desde AppNavHost
     onNavigateToRegistro: () -> Unit,
     onNavigateToConsultaCliente: () -> Unit
 ) {
-    // ViewModel nuevo basado en MVVM
-    val usuarioViewModel: UsuarioViewModel = viewModel()
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -43,7 +42,7 @@ fun LoginScreen(
 
     val loginError = usuarioViewModel.loginError
 
-    // Si el usuario inició sesión correctamente, navegar
+    // Cuando login es exitoso → navegar
     LaunchedEffect(usuarioViewModel.usuarioActual) {
         if (usuarioViewModel.usuarioActual != null) {
             onNavigateToConsultaCliente()
@@ -75,7 +74,8 @@ fun LoginScreen(
 
                             Text(
                                 text = "ConsultaMed",
-                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
                         }
@@ -84,7 +84,7 @@ fun LoginScreen(
                         containerColor = MaterialTheme.colorScheme.primary
                     )
                 )
-            },
+            }
         ) { innerPadding ->
 
             Box(
@@ -96,26 +96,25 @@ fun LoginScreen(
             ) {
 
                 Card(
-                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.onSurfaceVariant),
-                    border = BorderStroke(16.dp, Color.Transparent),
+                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(36.dp),
                     modifier = Modifier.padding(16.dp)
                 ) {
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(20.dp)
                     ) {
 
                         Text(
                             text = "Inicia Sesión",
                             fontSize = 26.sp,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(vertical = 24.dp),
-                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.onSurface
                         )
 
-                        // EMAIL
                         OutlinedTextField(
                             value = email,
                             onValueChange = {
@@ -124,27 +123,14 @@ fun LoginScreen(
                             },
                             label = { Text("Email") },
                             singleLine = true,
-                            modifier = Modifier.padding(3.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                                cursorColor = MaterialTheme.colorScheme.primary,
-                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                focusedLabelColor = MaterialTheme.colorScheme.primaryContainer
-                            )
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp)
                         )
                         if (emailError != null) {
-                            Text(
-                                text = emailError!!,
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                            )
+                            Text(emailError!!, color = Color.Red, fontSize = 12.sp)
                         }
 
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        // PASSWORD
                         OutlinedTextField(
                             value = password,
                             onValueChange = {
@@ -154,78 +140,42 @@ fun LoginScreen(
                             label = { Text("Contraseña") },
                             singleLine = true,
                             visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                            modifier = Modifier.padding(3.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                                cursorColor = MaterialTheme.colorScheme.primary,
-                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                focusedLabelColor = MaterialTheme.colorScheme.primaryContainer
-                            )
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp)
                         )
                         if (passwordError != null) {
-                            Text(
-                                text = passwordError!!,
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                            )
+                            Text(passwordError!!, color = Color.Red, fontSize = 12.sp)
                         }
 
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        // BOTÓN INGRESAR
                         Button(
                             onClick = {
                                 val errors = validateLogin(email, password)
                                 emailError = errors.emailError
                                 passwordError = errors.password1Error
 
-                                if (errors.emailError == null && errors.password1Error == null) {
+                                if (errors.emailError == null && errors.password1Error == null)
+                                {
                                     usuarioViewModel.login(email, password)
                                 }
                             },
-                            modifier = Modifier.padding(6.dp),
-                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primaryContainer)
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(
-                                "Ingresar",
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                            Text("Ingresar")
                         }
 
-                        // ERROR LOGIN
                         if (loginError != null) {
-                            Text(
-                                text = loginError,
-                                color = Color.Red,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(top = 8.dp)
-                            )
+                            Text(loginError, color = Color.Red, modifier = Modifier.padding(top = 6.dp))
                         }
 
-                        // REGISTRARSE
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.Top
-
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "¿No tienes una cuenta?",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-
-                            TextButton(onClick = { onNavigateToRegistro() }) {
-                                Text(
-                                    text = "Regístrate",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primaryContainer
-                                )
+                            Text("¿No tienes una cuenta?")
+                            TextButton(onClick = onNavigateToRegistro) {
+                                Text("Regístrate")
                             }
                         }
                     }
@@ -233,14 +183,4 @@ fun LoginScreen(
             }
         }
     }
-}
-
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun LoginScreenPreview() {
-    LoginScreen(
-        onNavigateToRegistro = {},
-        onNavigateToConsultaCliente = {}
-    )
 }

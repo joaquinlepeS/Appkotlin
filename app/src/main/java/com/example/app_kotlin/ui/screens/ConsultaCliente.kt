@@ -1,208 +1,98 @@
 package com.example.app_kotlin.ui.screens
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.app_kotlin.R
-import com.example.app_kotlin.viewmodel.UsuarioViewModel
+import com.example.app_kotlin.model.Consulta
 import com.example.app_kotlin.viewmodel.ConsultaViewModel
+import com.example.app_kotlin.viewmodel.UsuarioViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConsultaClienteScreen(
     usuarioViewModel: UsuarioViewModel,
-    consultaViewModel: ConsultaViewModel,
-    onNavigateToAgenda: () -> Unit,
-    onNavigateToLogin: () -> Unit,
-    onNavigateToDoctorList: () -> Unit
+    consultaViewModel: ConsultaViewModel
 ) {
-    val usuario = usuarioViewModel.usuarioActual
-    val consultas = consultaViewModel.consultas
+    val usuarioActual = usuarioViewModel.usuarioActual
+    val email = usuarioActual?.email ?: return
 
-    // cargar consultas al entrar
-    LaunchedEffect(usuario) {
-        usuario?.email?.let { consultaViewModel.cargarConsultas(it) }
+    // cargar consultas del usuario
+    val consultas = consultaViewModel.consultas.collectAsState().value
+
+    LaunchedEffect(Unit) {
+        consultaViewModel.cargarConsultas(email)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
 
-        Image(
-            painter = painterResource(id = R.drawable.wallpaper),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+        Text(
+            text = "Mis Consultas",
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        Scaffold(
-            containerColor = Color.Transparent,
-            floatingActionButton = {
-                FloatingActionButton(
-                    onClick = { onNavigateToAgenda() },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.White
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_calendar_month_24),
-                        contentDescription = "Agendar consulta"
+        if (consultas.isEmpty()) {
+            Text(
+                text = "No tienes consultas agendadas.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        } else {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(consultas) { consulta ->
+                    ConsultaCard(
+                        consulta = consulta,
+                        onEliminar = {
+                            consultaViewModel.eliminarConsulta(email, consulta.id)
+                        }
                     )
                 }
-            },
-            floatingActionButtonPosition = FabPosition.End,
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-
-                            TextButton(onClick = {
-                                usuarioViewModel.logout()
-                                onNavigateToLogin()
-                            }) {
-                                Text(
-                                    text = "Cerrar sesión",
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(16.dp))
-
-                            Image(
-                                painter = painterResource(id = R.drawable.baseline_medical_services_24),
-                                contentDescription = "Logo",
-                                modifier = Modifier.size(32.dp)
-                            )
-                            Text(
-                                text = "ConsultaMed",
-                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
-                )
             }
-        ) { innerPadding ->
+        }
+    }
+}
 
-            Box(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .background(Color.Black.copy(alpha = 0.3f))
-                    .fillMaxSize(),
-                contentAlignment = Alignment.TopCenter
+@Composable
+fun ConsultaCard(
+    consulta: Consulta,
+    onEliminar: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.elevatedCardElevation(6.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+
+            Text(
+                text = consulta.especialidad,
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text("Doctor: ${consulta.doctor}")
+            Text("Fecha: ${consulta.fecha}")
+            Text("Hora: ${consulta.hora}")
+            Text("Paciente: ${consulta.paciente}")
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = onEliminar,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                )
             ) {
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(24.dp),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(vertical = 24.dp)
-                ) {
-
-                    // --- TITULO ---
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        elevation = CardDefaults.cardElevation(10.dp)
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(16.dp)
-                        ) {
-
-                            Text(
-                                text = "Bienvenido, ${usuario?.nombre ?: "Usuario"}",
-                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(12.dp),
-                                textAlign = TextAlign.Center
-                            )
-
-                            // --- CONSULTAS ---
-                            if (consultas.isEmpty()) {
-                                Text(
-                                    text = "Aún no tienes consultas registradas.",
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.padding(16.dp)
-                                )
-                            } else {
-                                LazyRow(
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    contentPadding = PaddingValues(horizontal = 16.dp)
-                                ) {
-                                    items(consultas.size) { idx ->
-                                        val consulta = consultas[idx]
-
-                                        Card(
-                                            modifier = Modifier
-                                                .width(220.dp)
-                                                .height(150.dp)
-                                                .padding(vertical = 8.dp),
-                                            elevation = CardDefaults.cardElevation(8.dp),
-                                            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondaryContainer)
-                                        ) {
-                                            Column(
-                                                modifier = Modifier
-                                                    .fillMaxSize()
-                                                    .padding(8.dp),
-                                                verticalArrangement = Arrangement.SpaceEvenly
-                                            ) {
-
-                                                Text(
-                                                    text = "Consulta ID: ${consulta.id}",
-                                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                                )
-
-                                                Text(
-                                                    text = "Fecha: ${consulta.fecha}",
-                                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                                )
-
-                                                Text(
-                                                    text = "Hora: ${consulta.hora}",
-                                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                                )
-
-                                                Text(
-                                                    text = "Especialidad: ${consulta.especialidad}",
-                                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // --- BOTÓN VER DOCTORES ---
-                    Button(onClick = { onNavigateToDoctorList() }) {
-                        Text("Ver Doctores")
-                    }
-
-                }
+                Text("Eliminar")
             }
         }
     }

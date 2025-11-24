@@ -11,7 +11,6 @@ import com.example.app_kotlin.model.Doctor
 import com.example.app_kotlin.ui.screens.*
 import com.example.app_kotlin.viewmodel.ConsultaViewModel
 import com.example.app_kotlin.viewmodel.UsuarioViewModel
-import com.example.app_kotlin.viewmodel.DoctorViewModel
 import com.google.gson.Gson
 
 @Composable
@@ -19,10 +18,9 @@ fun AppNavHost() {
 
     val navController = rememberNavController()
 
-    // ViewModels globales para que sobrevivan entre pantallas
+    // ViewModels globales
     val usuarioViewModel: UsuarioViewModel = viewModel()
     val consultaViewModel: ConsultaViewModel = viewModel()
-    val doctorViewModel: DoctorViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -52,28 +50,22 @@ fun AppNavHost() {
         composable(Screens.CONSULTACLIENTE) {
             ConsultaClienteScreen(
                 usuarioViewModel = usuarioViewModel,
-                consultaViewModel = consultaViewModel,
-                onNavigateToAgenda = { navController.navigate(Screens.AGENDA) },
-                onNavigateToLogin = {
-                    usuarioViewModel.logout()
-                    navController.navigate(Screens.LOGIN) {
-                        popUpTo(0)
-                    }
-                },
-                onNavigateToDoctorList = { navController.navigate(Screens.DOCTOR_LIST) }
+                consultaViewModel = consultaViewModel
             )
         }
 
-        // AGENDA (PACIENTE)
+        // AGENDA
         composable(Screens.AGENDA) {
             AgendaScreen(
                 usuarioViewModel = usuarioViewModel,
                 consultaViewModel = consultaViewModel,
-                onNavigateToConsultaCliente = { navController.navigate(Screens.CONSULTACLIENTE) }
+                onNavigateToConsultaCliente = {
+                    navController.navigate(Screens.CONSULTACLIENTE)
+                }
             )
         }
 
-        // LISTA DE DOCTORES (API)
+        // LISTA DE DOCTORES
         composable(Screens.DOCTOR_LIST) {
             DoctorListScreen(
                 onDoctorSelected = { doctorJson ->
@@ -93,9 +85,7 @@ fun AppNavHost() {
 
             DoctorDetailScreen(
                 doctor = doctor,
-                onAgendar = {
-                    navController.navigate(Screens.AGENDA)
-                }
+                onAgendar = { navController.navigate(Screens.AGENDA) }
             )
         }
     }

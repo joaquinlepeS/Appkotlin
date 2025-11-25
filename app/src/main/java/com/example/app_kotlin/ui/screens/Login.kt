@@ -1,32 +1,56 @@
 package com.example.app_kotlin.ui.screens
 
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.app_kotlin.R
 import com.example.app_kotlin.utils.validateEmail
 import com.example.app_kotlin.utils.validateLogin
 import com.example.app_kotlin.utils.validatePassword
-import com.example.app_kotlin.viewmodel.PacienteViewModel
+import com.example.app_kotlin.viewmodel.UsuarioViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    usuarioViewModel: PacienteViewModel,   // 🔥 Se recibe desde AppNavHost
+    usuarioViewModel: UsuarioViewModel,
     onNavigateToRegistro: () -> Unit,
     onNavigateToConsultaCliente: () -> Unit
 ) {
+
+    // ---------------------------------------------------------
+    // 🔔 PERMISO DE NOTIFICACIONES (Android 13+)
+    // ---------------------------------------------------------
+    val context = LocalContext.current
+
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {}
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+    // ---------------------------------------------------------
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -140,8 +164,7 @@ fun LoginScreen(
                                 emailError = errors.emailError
                                 passwordError = errors.password1Error
 
-                                if (errors.emailError == null && errors.password1Error == null)
-                                {
+                                if (errors.emailError == null && errors.password1Error == null) {
                                     usuarioViewModel.login(email, password)
                                 }
                             },

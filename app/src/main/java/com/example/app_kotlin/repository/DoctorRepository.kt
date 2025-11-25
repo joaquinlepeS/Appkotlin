@@ -49,15 +49,4 @@ class DoctorRepository {
             emptyList()
         }
     }
-
-    // 🔵 Subir 1 doctor a MockAPI
-    suspend fun subirDoctorAMockApi(doctor: Doctor): Boolean {
-        return try {
-            RetrofitClientDoctor.api.postDoctor(doctor)
-            true
-        } catch (e: Exception) {
-            false
-        }
-    }
-
 }

@@ -1,5 +1,6 @@
 package com.example.app_kotlin.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -8,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -18,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.app_kotlin.R
-import com.example.app_kotlin.viewmodel.PacienteViewModel
+import com.example.app_kotlin.viewmodel.UsuarioViewModel
 import com.example.app_kotlin.utils.validateEmail
 import com.example.app_kotlin.utils.validatePassword
 
@@ -27,7 +29,7 @@ import com.example.app_kotlin.utils.validatePassword
 fun RegistroScreen(
     onNavigateToLogin: () -> Unit
 ) {
-    val usuarioViewModel: PacienteViewModel = viewModel()
+    val usuarioViewModel: UsuarioViewModel = viewModel()
 
     var nombre by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }

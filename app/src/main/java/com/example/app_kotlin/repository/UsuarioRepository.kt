@@ -1,12 +1,12 @@
 package com.example.app_kotlin.repository
 
-import com.example.app_kotlin.model.Paciente
+import com.example.app_kotlin.model.Usuario
 import com.example.app_kotlin.model.DataStoreManager
 import kotlinx.coroutines.flow.first
 
-class PacienteRepository(private val dataStore: DataStoreManager) {
+class UsuarioRepository(private val dataStore: DataStoreManager) {
 
-    suspend fun registrarUsuario(usuario: Paciente): Boolean {
+    suspend fun registrarUsuario(usuario: Usuario): Boolean {
         val usuarios = dataStore.getUsers().first()
 
         if (usuarios.any { it.email == usuario.email }) return false
@@ -18,7 +18,7 @@ class PacienteRepository(private val dataStore: DataStoreManager) {
         return true
     }
 
-    suspend fun login(email: String, password: String): Paciente? {
+    suspend fun login(email: String, password: String): Usuario? {
         val usuarios = dataStore.getUsers().first()
         return usuarios.find { it.email == email && it.password == password }
     }

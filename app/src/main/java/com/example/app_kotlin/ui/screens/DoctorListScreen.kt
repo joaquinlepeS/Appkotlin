@@ -106,10 +106,6 @@ fun DoctorListScreen(
                 }
             }
         }
-        Button(onClick = { doctorViewModel.subirDoctoresAMockApi() }) {
-            Text("Subir doctores a MockAPI")
-        }
-
     }
 }
 

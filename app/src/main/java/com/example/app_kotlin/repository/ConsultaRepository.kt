@@ -1,36 +1,37 @@
 package com.example.app_kotlin.repository
 
 import com.example.app_kotlin.model.Consulta
-import com.example.app_kotlin.model.DataStoreManager
-import kotlinx.coroutines.flow.first
+import com.example.app_kotlin.remote.ConsultaRetrofit
 
-class ConsultaRepository(private val dataStore: DataStoreManager) {
+class ConsultaRepository {
 
-    suspend fun agregarConsulta(usuarioEmail: String, consulta: Consulta) {
-        val mapa = dataStore.getConsulta().first()
-            .mapValues { it.value.toMutableList() }
-            .toMutableMap()
-        val lista = mapa.getOrPut(usuarioEmail) { mutableListOf() }
-
-        val id = if (lista.isEmpty()) 1 else lista.maxOf { it.id } + 1
-
-        lista.add(consulta.copy(id = id))
-
-        dataStore.saveConsulta(mapa)
+    suspend fun getAll(): List<Consulta> {
+        println("DEBUG → Repository.getAll() llamado")
+        return ConsultaRetrofit.api.getConsultas()
     }
 
-    suspend fun obtenerConsultas(usuarioEmail: String): List<Consulta> {
-        val mapa = dataStore.getConsulta().first()
-        return mapa[usuarioEmail] ?: emptyList()
+    suspend fun getById(id: Long): Consulta {
+        println("DEBUG → Repository.getById($id) llamado")
+        return ConsultaRetrofit.api.getConsultaById(id)
     }
 
-    suspend fun eliminarConsulta(usuarioEmail: String, id: Int) {
-        val mapa = dataStore.getConsulta().first().toMutableMap()
-        val lista = mapa[usuarioEmail]?.toMutableList() ?: return
+    suspend fun getByDoctor(doctorId: Long): List<Consulta> {
+        println("DEBUG → Repository.getByDoctor($doctorId) llamado")
+        return ConsultaRetrofit.api.getConsultasPorDoctor(doctorId)
+    }
 
-        lista.removeIf { it.id == id }
-        mapa[usuarioEmail] = lista
+    suspend fun getByPaciente(pacienteId: Long): List<Consulta> {
+        println("DEBUG → Repository.getByPaciente($pacienteId) llamado")
+        return ConsultaRetrofit.api.getConsultasPorPaciente(pacienteId)
+    }
 
-        dataStore.saveConsulta(mapa)
+    suspend fun update(id: Long, consulta: Consulta): Consulta {
+        println("DEBUG → Repository.update($id) llamado")
+        return ConsultaRetrofit.api.updateConsulta(id, consulta)
+    }
+
+    suspend fun delete(id: Long) {
+        println("DEBUG → Repository.delete($id) llamado")
+        ConsultaRetrofit.api.deleteConsulta(id)
     }
 }

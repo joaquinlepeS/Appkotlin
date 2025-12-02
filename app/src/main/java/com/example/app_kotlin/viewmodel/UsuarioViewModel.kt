@@ -2,7 +2,7 @@ package com.example.app_kotlin.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.app_kotlin.model.Usuario
+import com.example.app_kotlin.model.Paciente
 import com.example.app_kotlin.repository.UsuarioRepository
 import com.example.app_kotlin.model.DataStoreManager
 import com.example.app_kotlin.App
@@ -17,7 +17,7 @@ class UsuarioViewModel : ViewModel() {
     // ✔ Repositorio interno (NO requiere constructor externo)
     private val repo = UsuarioRepository(dataStore)
 
-    var usuarioActual by mutableStateOf<Usuario?>(null)
+    var pacienteActual by mutableStateOf<Paciente?>(null)
         private set
 
     var loginError by mutableStateOf<String?>(null)
@@ -32,7 +32,7 @@ class UsuarioViewModel : ViewModel() {
             if (usuario == null) {
                 loginError = "Credenciales inválidas"
             } else {
-                usuarioActual = usuario
+                pacienteActual = usuario
                 loginError = null
             }
         }
@@ -40,12 +40,12 @@ class UsuarioViewModel : ViewModel() {
 
     fun registrarUsuario(nombre: String, email: String, password: String) {
         viewModelScope.launch {
-            val ok = repo.registrarUsuario(Usuario(email, password, nombre))
+            val ok = repo.registrarUsuario(Paciente(email, password, nombre))
             registroExitoso = ok
         }
     }
 
     fun logout() {
-        usuarioActual = null
+        pacienteActual = null
     }
 }

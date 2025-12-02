@@ -1,8 +1,7 @@
 package com.example.app_kotlin.repository
 
-import com.example.app_kotlin.remote.RetrofitClientDoctor
+import com.example.app_kotlin.remote.DoctorRetrofit
 import com.example.app_kotlin.model.Doctor
-import com.example.app_kotlin.model.RandomUser
 
 class DoctorRepository {
 
@@ -26,7 +25,7 @@ class DoctorRepository {
 
     suspend fun getDoctors(): List<Doctor> {
         return try {
-            val response = RetrofitClientDoctor.api.getDoctors()
+            val response = DoctorRetrofit.api.getDoctors()
 
             response.results.map { user ->
 

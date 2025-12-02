@@ -40,7 +40,7 @@ fun AgendaScreen(
     // Cargar datos del doctor y consultas del usuario
     LaunchedEffect(Unit) {
         doctorViewModel.fetchDoctors()
-        usuarioViewModel.usuarioActual?.let {
+        usuarioViewModel.pacienteActual?.let {
             consultaViewModel.cargarConsultas(it.email)
         }
     }
@@ -233,7 +233,7 @@ fun AgendaScreen(
                             // CONFIRMAR
                             Button(
                                 onClick = {
-                                    val user = usuarioViewModel.usuarioActual ?: return@Button
+                                    val user = usuarioViewModel.pacienteActual ?: return@Button
 
                                     consultaViewModel.agregarConsulta(
                                         user.email,

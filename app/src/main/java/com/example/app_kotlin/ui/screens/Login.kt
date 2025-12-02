@@ -3,11 +3,9 @@ package com.example.app_kotlin.ui.screens
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,9 +15,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.app_kotlin.R
@@ -61,8 +57,8 @@ fun LoginScreen(
     val loginError = usuarioViewModel.loginError
 
     // Cuando login es exitoso → navegar
-    LaunchedEffect(usuarioViewModel.usuarioActual) {
-        if (usuarioViewModel.usuarioActual != null) {
+    LaunchedEffect(usuarioViewModel.pacienteActual) {
+        if (usuarioViewModel.pacienteActual != null) {
             onNavigateToConsultaCliente()
         }
     }

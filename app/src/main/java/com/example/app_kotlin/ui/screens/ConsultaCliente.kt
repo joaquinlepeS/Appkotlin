@@ -31,7 +31,7 @@ fun ConsultaClienteScreen(
     onNavigateToLogin: () -> Unit
 
 ) {
-    val usuarioActual = usuarioViewModel.usuarioActual
+    val usuarioActual = usuarioViewModel.pacienteActual
     val email = usuarioActual?.email ?: return
 
     val consultas = consultaViewModel.consultas.collectAsState().value

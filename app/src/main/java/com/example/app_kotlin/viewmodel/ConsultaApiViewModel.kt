@@ -2,8 +2,6 @@ package com.example.app_kotlin.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.app_kotlin.model.ConsultaApi
-import com.example.app_kotlin.repository.ConsultaApiRepository
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.*
 

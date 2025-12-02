@@ -1,6 +1,5 @@
 package com.example.app_kotlin.remote
 
-import com.example.app_kotlin.model.RandomUserResponse
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -8,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 
-object RetrofitClientDoctor {
+object DoctorRetrofit {
 
     private const val BASE_URL = "https://randomuser.me/"
 

@@ -14,6 +14,6 @@ class UsuarioViewModelTest {
         vm.logout()  // este método SI existe
 
         // Verificamos que despues de logout es null
-        Assert.assertNull(vm.usuarioActual)
+        Assert.assertNull(vm.pacienteActual)
     }
 }

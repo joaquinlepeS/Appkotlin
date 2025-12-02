@@ -20,15 +20,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.app_kotlin.R
 import com.example.app_kotlin.model.Consulta
 import com.example.app_kotlin.utils.showAgendaNotification
-import com.example.app_kotlin.viewmodel.ConsultaApiViewModel
 import com.example.app_kotlin.viewmodel.ConsultaViewModel
 import com.example.app_kotlin.viewmodel.DoctorViewModel
-import com.example.app_kotlin.viewmodel.UsuarioViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgendaScreen(
-    usuarioViewModel: UsuarioViewModel,
+    `pacienteViewModel.kt`: `PacienteViewModel.kt`,
     doctorViewModel: DoctorViewModel,
     consultaViewModel: ConsultaViewModel = viewModel(),
     consultaApiViewModel: ConsultaApiViewModel = viewModel(),
@@ -40,7 +38,7 @@ fun AgendaScreen(
     // Cargar datos del doctor y consultas del usuario
     LaunchedEffect(Unit) {
         doctorViewModel.fetchDoctors()
-        usuarioViewModel.pacienteActual?.let {
+        `pacienteViewModel.kt`.pacienteActual?.let {
             consultaViewModel.cargarConsultas(it.email)
         }
     }
@@ -233,7 +231,7 @@ fun AgendaScreen(
                             // CONFIRMAR
                             Button(
                                 onClick = {
-                                    val user = usuarioViewModel.pacienteActual ?: return@Button
+                                    val user = `pacienteViewModel.kt`.pacienteActual ?: return@Button
 
                                     consultaViewModel.agregarConsulta(
                                         user.email,

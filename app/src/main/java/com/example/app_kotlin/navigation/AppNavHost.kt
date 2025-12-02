@@ -10,22 +10,20 @@ import androidx.navigation.navArgument
 import com.example.app_kotlin.model.Doctor
 import com.example.app_kotlin.ui.screens.*
 import com.example.app_kotlin.viewmodel.ConsultaViewModel
-import com.example.app_kotlin.viewmodel.UsuarioViewModel
 import com.example.app_kotlin.viewmodel.DoctorViewModel
-import com.example.app_kotlin.viewmodel.ConsultaApiViewModel
+import com.example.app_kotlin.viewmodel.PacienteViewModel
 import com.google.gson.Gson
-import android.util.Base64   // ✔ Base64 válido para todas las versiones de Android
+import android.util.Base64
 
 @Composable
 fun AppNavHost() {
 
     val navController = rememberNavController()
 
-    // ViewModels globales
-    val usuarioViewModel: UsuarioViewModel = viewModel()
+    // ViewModels globales y compartidos entre pantallas
+    val pacienteViewModel: PacienteViewModel = viewModel()
     val consultaViewModel: ConsultaViewModel = viewModel()
     val doctorViewModel: DoctorViewModel = viewModel()
-    val consultaApiViewModel: ConsultaApiViewModel = viewModel()   // ✔ ya agregado anteriormente
 
     NavHost(
         navController = navController,
@@ -35,7 +33,7 @@ fun AppNavHost() {
         // LOGIN
         composable(Screens.LOGIN) {
             LoginScreen(
-                usuarioViewModel = usuarioViewModel,
+                pacienteViewModel = pacienteViewModel,
                 onNavigateToRegistro = { navController.navigate(Screens.REGISTER) },
                 onNavigateToConsultaCliente = {
                     navController.navigate(Screens.CONSULTACLIENTE) {
@@ -48,6 +46,7 @@ fun AppNavHost() {
         // REGISTRO
         composable(Screens.REGISTER) {
             RegistroScreen(
+                pacienteViewModel = pacienteViewModel,
                 onNavigateToLogin = { navController.navigate(Screens.LOGIN) }
             )
         }
@@ -55,8 +54,9 @@ fun AppNavHost() {
         // CONSULTA CLIENTE
         composable(Screens.CONSULTACLIENTE) {
             ConsultaClienteScreen(
-                usuarioViewModel = usuarioViewModel,
+                pacienteViewModel = pacienteViewModel,
                 consultaViewModel = consultaViewModel,
+                doctorViewModel = doctorViewModel,
                 onNavigateToAgenda = {
                     navController.navigate(Screens.AGENDA)
                 },
@@ -65,22 +65,18 @@ fun AppNavHost() {
                 },
                 onNavigateToLogin = {
                     navController.navigate(Screens.LOGIN) {
-                        popUpTo(0) { inclusive = true } // Limpia TODO el backstack
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
-
-
-
         }
 
         // AGENDA
         composable(Screens.AGENDA) {
             AgendaScreen(
-                usuarioViewModel = usuarioViewModel,
+                pacienteViewModel = pacienteViewModel,
                 consultaViewModel = consultaViewModel,
                 doctorViewModel = doctorViewModel,
-                consultaApiViewModel = consultaApiViewModel,
                 onNavigateToConsultaCliente = {
                     navController.navigate(Screens.CONSULTACLIENTE)
                 }
@@ -93,7 +89,7 @@ fun AppNavHost() {
                 doctorViewModel = doctorViewModel,
                 onDoctorSelected = { doctorJson ->
 
-                    // ✔ Base64 compatible para todas las APIs
+                    // Codificación segura Base64
                     val encoded = Base64.encodeToString(
                         doctorJson.toByteArray(),
                         Base64.URL_SAFE or Base64.NO_WRAP
@@ -112,7 +108,7 @@ fun AppNavHost() {
 
             val encoded = backStackEntry.arguments?.getString("doctorJson")!!
 
-            // ✔ Decodificación segura
+            // Decodificar Base64
             val decodedBytes = Base64.decode(encoded, Base64.URL_SAFE or Base64.NO_WRAP)
             val decodedJson = String(decodedBytes)
 

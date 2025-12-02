@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -19,19 +18,18 @@ import androidx.compose.ui.unit.dp
 import com.example.app_kotlin.R
 import com.example.app_kotlin.model.Consulta
 import com.example.app_kotlin.viewmodel.ConsultaViewModel
-import com.example.app_kotlin.viewmodel.UsuarioViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConsultaClienteScreen(
-    usuarioViewModel: UsuarioViewModel,
+    `pacienteViewModel.kt`: `PacienteViewModel.kt`,
     consultaViewModel: ConsultaViewModel,
     onNavigateToAgenda: () -> Unit,
     onNavigateToDoctorList: () -> Unit,
     onNavigateToLogin: () -> Unit
 
 ) {
-    val usuarioActual = usuarioViewModel.pacienteActual
+    val usuarioActual = `pacienteViewModel.kt`.pacienteActual
     val email = usuarioActual?.email ?: return
 
     val consultas = consultaViewModel.consultas.collectAsState().value
@@ -93,7 +91,7 @@ fun ConsultaClienteScreen(
 
                     IconButton(
                         onClick = {
-                            usuarioViewModel.logout()
+                            `pacienteViewModel.kt`.logout()
 
                             onNavigateToLogin() // <-- navega y limpia navegación
                         }

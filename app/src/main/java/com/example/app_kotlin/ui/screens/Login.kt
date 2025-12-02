@@ -22,12 +22,11 @@ import com.example.app_kotlin.R
 import com.example.app_kotlin.utils.validateEmail
 import com.example.app_kotlin.utils.validateLogin
 import com.example.app_kotlin.utils.validatePassword
-import com.example.app_kotlin.viewmodel.UsuarioViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    usuarioViewModel: UsuarioViewModel,
+    `pacienteViewModel.kt`: `PacienteViewModel.kt`,
     onNavigateToRegistro: () -> Unit,
     onNavigateToConsultaCliente: () -> Unit
 ) {
@@ -54,11 +53,11 @@ fun LoginScreen(
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
 
-    val loginError = usuarioViewModel.loginError
+    val loginError = `pacienteViewModel.kt`.loginError
 
     // Cuando login es exitoso → navegar
-    LaunchedEffect(usuarioViewModel.pacienteActual) {
-        if (usuarioViewModel.pacienteActual != null) {
+    LaunchedEffect(`pacienteViewModel.kt`.pacienteActual) {
+        if (`pacienteViewModel.kt`.pacienteActual != null) {
             onNavigateToConsultaCliente()
         }
     }
@@ -161,7 +160,7 @@ fun LoginScreen(
                                 passwordError = errors.password1Error
 
                                 if (errors.emailError == null && errors.password1Error == null) {
-                                    usuarioViewModel.login(email, password)
+                                    `pacienteViewModel.kt`.login(email, password)
                                 }
                             },
                             modifier = Modifier.fillMaxWidth()

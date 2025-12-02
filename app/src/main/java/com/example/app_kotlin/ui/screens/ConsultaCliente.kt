@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -18,31 +19,32 @@ import androidx.compose.ui.unit.dp
 import com.example.app_kotlin.R
 import com.example.app_kotlin.model.Consulta
 import com.example.app_kotlin.viewmodel.ConsultaViewModel
+import com.example.app_kotlin.viewmodel.DoctorViewModel
+import com.example.app_kotlin.viewmodel.PacienteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConsultaClienteScreen(
-    `pacienteViewModel.kt`: `PacienteViewModel.kt`,
+    pacienteViewModel: PacienteViewModel,
     consultaViewModel: ConsultaViewModel,
+    doctorViewModel: DoctorViewModel,
     onNavigateToAgenda: () -> Unit,
     onNavigateToDoctorList: () -> Unit,
     onNavigateToLogin: () -> Unit
-
 ) {
-    val usuarioActual = `pacienteViewModel.kt`.pacienteActual
-    val email = usuarioActual?.email ?: return
 
-    val consultas = consultaViewModel.consultas.collectAsState().value
+    val usuarioActual = pacienteViewModel.pacienteActual ?: return
 
-    LaunchedEffect(usuarioActual) {
-        usuarioActual?.let {
-            consultaViewModel.cargarConsultas(it.email)
-        }
+    val consultas = consultaViewModel.consultas
+    val pacienteId = usuarioActual.id ?: return
+
+    // 🔥 Cargar consultas reales del backend
+    LaunchedEffect(pacienteId) {
+        consultaViewModel.loadByPaciente(pacienteId)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // 🔵 Fondo estético
         Image(
             painter = painterResource(id = R.drawable.wallpaper),
             contentDescription = null,
@@ -50,7 +52,6 @@ fun ConsultaClienteScreen(
             contentScale = ContentScale.Crop
         )
 
-        // 🔵 Capa oscura para legibilidad
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -77,7 +78,7 @@ fun ConsultaClienteScreen(
                     .padding(16.dp)
             ) {
 
-                // 👋 Saludo
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -91,9 +92,8 @@ fun ConsultaClienteScreen(
 
                     IconButton(
                         onClick = {
-                            `pacienteViewModel.kt`.logout()
-
-                            onNavigateToLogin() // <-- navega y limpia navegación
+                            pacienteViewModel.logout()
+                            onNavigateToLogin()
                         }
                     ) {
                         Icon(
@@ -102,9 +102,7 @@ fun ConsultaClienteScreen(
                             tint = Color.White
                         )
                     }
-
                 }
-
 
                 Spacer(modifier = Modifier.height(6.dp))
 
@@ -116,7 +114,6 @@ fun ConsultaClienteScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // 🟣 Botón para ir al personal médico
                 Button(
                     onClick = onNavigateToDoctorList,
                     modifier = Modifier
@@ -134,7 +131,7 @@ fun ConsultaClienteScreen(
                     )
                 }
 
-                // 📌 Texto si no hay consultas
+
                 if (consultas.isEmpty()) {
                     Text(
                         text = "No tienes consultas agendadas aún.",
@@ -142,7 +139,7 @@ fun ConsultaClienteScreen(
                         color = Color.White.copy(alpha = 0.85f)
                     )
                 } else {
-                    // 🟢 Lista de consultas
+
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(14.dp),
                         modifier = Modifier.fillMaxHeight()
@@ -151,7 +148,8 @@ fun ConsultaClienteScreen(
                             ConsultaCard(
                                 consulta = consulta,
                                 onEliminar = {
-                                    consultaViewModel.eliminarConsulta(email, consulta.id)
+                                    consultaViewModel.deleteConsulta(consulta.id!!)
+                                    consultaViewModel.loadByPaciente(pacienteId)
                                 }
                             )
                         }
@@ -161,6 +159,7 @@ fun ConsultaClienteScreen(
         }
     }
 }
+
 
 @Composable
 fun ConsultaCard(
@@ -187,7 +186,7 @@ fun ConsultaCard(
             )
 
             Text(
-                text = "Doctor: ${consulta.doctor}",
+                text = "Doctor: ${consulta.doctor?.nombre}",
                 style = MaterialTheme.typography.bodyLarge
             )
 
@@ -197,13 +196,12 @@ fun ConsultaCard(
             }
 
             Text(
-                text = "Paciente: ${consulta.paciente}",
+                text = "Paciente: ${consulta.paciente?.nombre}",
                 style = MaterialTheme.typography.bodyMedium
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // 🔴 Botón eliminar
             Button(
                 onClick = onEliminar,
                 colors = ButtonDefaults.buttonColors(

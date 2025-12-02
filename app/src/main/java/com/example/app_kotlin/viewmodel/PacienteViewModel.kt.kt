@@ -20,17 +20,25 @@ class PacienteViewModel : ViewModel() {
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
-    fun registrarPaciente(paciente: Paciente) {
+    fun registrarPaciente(nombre: String, email: String, password: String) {
         viewModelScope.launch {
             try {
                 isLoading = true
                 errorMessage = null
 
-                println("DEBUG → ViewModel.registrarPaciente()")
-                pacienteActual = repository.createPaciente(paciente)
+                val nuevo = Paciente(
+                    id = null,
+                    nombre = nombre,
+                    email = email,
+                    password = password
+                )
+
+                val creado = repository.createPaciente(nuevo)
+
+                pacienteActual = creado
 
             } catch (e: Exception) {
-                errorMessage = e.localizedMessage ?: "Error desconocido"
+                errorMessage = e.message ?: "Error desconocido"
             } finally {
                 isLoading = false
             }
@@ -53,6 +61,36 @@ class PacienteViewModel : ViewModel() {
         }
     }
 
+    fun login(email: String, password: String, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                isLoading = true
+                errorMessage = null
+
+                println("DEBUG → Login buscando paciente con email: $email")
+
+                val paciente = repository.getPacienteByEmail(email)
+
+                println("DEBUG → Paciente encontrado: $paciente")
+
+                // Validar contraseña
+                if (paciente.password != password) {
+                    errorMessage = "Contraseña incorrecta"
+                    return@launch
+                }
+
+                pacienteActual = paciente
+                onSuccess()
+
+            } catch (e: Exception) {
+                println("DEBUG → ERROR LOGIN: ${e.message}")
+                errorMessage = "Email no encontrado"
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
     fun buscarPorEmail(email: String) {
         viewModelScope.launch {
             try {
@@ -68,4 +106,9 @@ class PacienteViewModel : ViewModel() {
             }
         }
     }
+
+    fun logout() {
+        pacienteActual = null
+    }
+
 }

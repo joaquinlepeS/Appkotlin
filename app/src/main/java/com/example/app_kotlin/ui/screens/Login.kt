@@ -22,17 +22,18 @@ import com.example.app_kotlin.R
 import com.example.app_kotlin.utils.validateEmail
 import com.example.app_kotlin.utils.validateLogin
 import com.example.app_kotlin.utils.validatePassword
+import com.example.app_kotlin.viewmodel.PacienteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    `pacienteViewModel.kt`: `PacienteViewModel.kt`,
+    pacienteViewModel: PacienteViewModel,
     onNavigateToRegistro: () -> Unit,
     onNavigateToConsultaCliente: () -> Unit
 ) {
 
     // ---------------------------------------------------------
-    // 🔔 PERMISO DE NOTIFICACIONES (Android 13+)
+    // 🔔 PERMISOS DE NOTIFICACIONES (Android 13+)
     // ---------------------------------------------------------
     val context = LocalContext.current
 
@@ -47,17 +48,19 @@ fun LoginScreen(
     }
     // ---------------------------------------------------------
 
+    // STATE
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
 
-    val loginError = `pacienteViewModel.kt`.loginError
+    val loginError = pacienteViewModel.errorMessage
+    val isLoading = pacienteViewModel.isLoading
 
-    // Cuando login es exitoso → navegar
-    LaunchedEffect(`pacienteViewModel.kt`.pacienteActual) {
-        if (`pacienteViewModel.kt`.pacienteActual != null) {
+    // Navegación automática si login exitoso
+    LaunchedEffect(pacienteViewModel.pacienteActual) {
+        if (pacienteViewModel.pacienteActual != null) {
             onNavigateToConsultaCliente()
         }
     }
@@ -120,6 +123,7 @@ fun LoginScreen(
                             color = MaterialTheme.colorScheme.onSurface
                         )
 
+                        // EMAIL
                         OutlinedTextField(
                             value = email,
                             onValueChange = {
@@ -128,14 +132,15 @@ fun LoginScreen(
                             },
                             label = { Text("Email") },
                             singleLine = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 8.dp)
+                            modifier = Modifier.fillMaxWidth()
                         )
                         if (emailError != null) {
                             Text(emailError!!, color = Color.Red, fontSize = 12.sp)
                         }
 
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // PASSWORD
                         OutlinedTextField(
                             value = password,
                             onValueChange = {
@@ -145,38 +150,52 @@ fun LoginScreen(
                             label = { Text("Contraseña") },
                             singleLine = true,
                             visualTransformation = PasswordVisualTransformation(),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 8.dp)
+                            modifier = Modifier.fillMaxWidth()
                         )
                         if (passwordError != null) {
                             Text(passwordError!!, color = Color.Red, fontSize = 12.sp)
                         }
 
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // BOTÓN LOGIN
                         Button(
                             onClick = {
-                                val errors = validateLogin(email, password)
-                                emailError = errors.emailError
-                                passwordError = errors.password1Error
+                                val errores = validateLogin(email, password)
+                                emailError = errores.emailError
+                                passwordError = errores.password1Error
 
-                                if (errors.emailError == null && errors.password1Error == null) {
-                                    `pacienteViewModel.kt`.login(email, password)
+                                if (errores.emailError == null && errores.password1Error == null) {
+                                    pacienteViewModel.login(email, password) {
+                                        onNavigateToConsultaCliente()
+                                    }
                                 }
                             },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Ingresar")
-                        }
-
-                        if (loginError != null) {
-                            Text(loginError, color = Color.Red, modifier = Modifier.padding(top = 6.dp))
-                        }
-
-                        Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
+                            enabled = !isLoading
                         ) {
+                            if (isLoading) {
+                                CircularProgressIndicator(
+                                    color = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            } else {
+                                Text("Ingresar")
+                            }
+                        }
+
+                        // ERROR DEL LOGIN
+                        if (loginError != null) {
+                            Text(
+                                loginError,
+                                color = Color.Red,
+                                modifier = Modifier.padding(top = 6.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row {
                             Text("¿No tienes una cuenta?")
                             TextButton(onClick = onNavigateToRegistro) {
                                 Text("Regístrate")

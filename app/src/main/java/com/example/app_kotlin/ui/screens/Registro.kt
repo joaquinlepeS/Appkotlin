@@ -30,10 +30,15 @@ fun RegistroScreen(
 ) {
     var nombre by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var password1 by remember { mutableStateOf("") }
+    var password2 by remember { mutableStateOf("") }
+
 
     val isLoading = pacienteViewModel.isLoading
     val apiError = pacienteViewModel.errorMessage
+    var passwordError by remember { mutableStateOf<String?>(null) }
+    var emailError by remember { mutableStateOf<String?>(null) }
+
 
     Column(
         modifier = Modifier
@@ -60,16 +65,29 @@ fun RegistroScreen(
 
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = { email = it
+                emailError = validateEmail(email)
+            },
             label = { Text("Email") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
+            value = password1,
+            onValueChange = { password1 = it
+                passwordError = validatePassword(password1)},
             label = { Text("Contraseña") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = password2,
+            onValueChange = { password2 = it },
+            label = { Text("Repita Contraseña") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -83,7 +101,7 @@ fun RegistroScreen(
 
         Button(
             onClick = {
-                pacienteViewModel.registrarPaciente(nombre, email, password)
+                pacienteViewModel.registrarPaciente(nombre, email, password1)
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading

@@ -145,7 +145,6 @@ fun LoginScreen(
                             value = password,
                             onValueChange = {
                                 password = it
-                                passwordError = validatePassword(password)
                             },
                             label = { Text("Contraseña") },
                             singleLine = true,

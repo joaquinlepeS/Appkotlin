@@ -3,41 +3,137 @@ package com.example.app_kotlin.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.app_kotlin.model.Consulta
-import com.example.app_kotlin.model.DataStoreManager
 import com.example.app_kotlin.repository.ConsultaRepository
-import com.example.app_kotlin.App
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.*
 
 class ConsultaViewModel : ViewModel() {
 
-    // ✔ DataStoreManager usando el contexto global de la App
-    private val dataStoreManager = DataStoreManager(App.context)
+    // Repositorio para acceder a Retrofit
+    private val repository = ConsultaRepository()
 
-    // ✔ Repositorio sin parámetros externos
-    private val repository = ConsultaRepository(dataStoreManager)
+    // Estado: lista de consultas (para listas)
+    var consultas by mutableStateOf<List<Consulta>>(emptyList())
+        private set
 
-    private val _consultas = MutableStateFlow<List<Consulta>>(emptyList())
-    val consultas: StateFlow<List<Consulta>> = _consultas
+    // Estado: una consulta (para detalle, editar, actualizar)
+    var consultaSeleccionada by mutableStateOf<Consulta?>(null)
+        private set
 
-    fun cargarConsultas(email: String) {
+    // Estado: cargando
+    var isLoading by mutableStateOf(false)
+        private set
+
+    // Estado: error
+    var errorMessage by mutableStateOf<String?>(null)
+        private set
+
+    // ------------------------------
+    // 🔷 FUNCIONES PARA LA UI
+    // ------------------------------
+
+    fun loadAll() {
         viewModelScope.launch {
-            _consultas.value = repository.obtenerConsultas(email)
+            try {
+                isLoading = true
+                errorMessage = null
+
+                println("DEBUG → ViewModel.loadAll()")
+                consultas = repository.getAll()
+
+            } catch (e: Exception) {
+                errorMessage = e.localizedMessage ?: "Error desconocido"
+            } finally {
+                isLoading = false
+            }
         }
     }
 
-    fun agregarConsulta(email: String, consulta: Consulta) {
+    fun loadByDoctor(doctorId: Long) {
         viewModelScope.launch {
-            repository.agregarConsulta(email, consulta)
-            cargarConsultas(email)
+            try {
+                isLoading = true
+                errorMessage = null
+
+                println("DEBUG → ViewModel.loadByDoctor($doctorId)")
+                consultas = repository.getByDoctor(doctorId)
+
+            } catch (e: Exception) {
+                errorMessage = e.localizedMessage ?: "Error desconocido"
+            } finally {
+                isLoading = false
+            }
         }
     }
 
-    fun eliminarConsulta(email: String, id: Int) {
+    fun loadByPaciente(pacienteId: Long) {
         viewModelScope.launch {
-            repository.eliminarConsulta(email, id)
-            cargarConsultas(email)
+            try {
+                isLoading = true
+                errorMessage = null
+
+                println("DEBUG → ViewModel.loadByPaciente($pacienteId)")
+                consultas = repository.getByPaciente(pacienteId)
+
+            } catch (e: Exception) {
+                errorMessage = e.localizedMessage ?: "Error desconocido"
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    fun loadById(id: Long) {
+        viewModelScope.launch {
+            try {
+                isLoading = true
+                errorMessage = null
+
+                println("DEBUG → ViewModel.loadById($id)")
+                consultaSeleccionada = repository.getById(id)
+
+            } catch (e: Exception) {
+                errorMessage = e.localizedMessage ?: "Error desconocido"
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    fun updateConsulta(id: Long, consulta: Consulta) {
+        viewModelScope.launch {
+            try {
+                isLoading = true
+                errorMessage = null
+
+                println("DEBUG → ViewModel.updateConsulta($id)")
+                consultaSeleccionada = repository.update(id, consulta)
+
+            } catch (e: Exception) {
+                errorMessage = e.localizedMessage ?: "Error desconocido"
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    fun deleteConsulta(id: Long) {
+        viewModelScope.launch {
+            try {
+                isLoading = true
+                errorMessage = null
+
+                println("DEBUG → ViewModel.deleteConsulta($id)")
+                repository.delete(id)
+
+                // Después de eliminar, recargar lista
+                loadAll()
+
+            } catch (e: Exception) {
+                errorMessage = e.localizedMessage ?: "Error desconocido"
+            } finally {
+                isLoading = false
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.example.app_kotlin
 
 import com.example.app_kotlin.viewmodel.UsuarioViewModel
-import org.junit.Assert.assertNull
+import org.junit.Assert
 import org.junit.Test
 
 class UsuarioViewModelTest {
@@ -14,6 +14,6 @@ class UsuarioViewModelTest {
         vm.logout()  // este método SI existe
 
         // Verificamos que despues de logout es null
-        assertNull(vm.usuarioActual)
+        Assert.assertNull(vm.usuarioActual)
     }
 }

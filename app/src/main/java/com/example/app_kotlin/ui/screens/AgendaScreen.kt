@@ -54,24 +54,40 @@ fun AgendaScreen(
 
     val especialidades = doctores.map { it.especialidad }.distinct()
 
-    val doctoresFiltrados =
-        if (especialidad.isNotEmpty())
-            doctores.filter { it.especialidad == especialidad }
-        else emptyList()
+    // 🔹 Datos base
 
-    // Consultas del doctor seleccionado
-    val consultasDelDoctor =
-        if (doctorIdSeleccionado != null)
-            consultas.filter { it.doctor?.id == doctorIdSeleccionado }
-        else emptyList()
+// 🔹 Doctores según especialidad (reactivo)
+    val doctoresFiltrados by remember(especialidad, doctores) {
+        mutableStateOf(
+            if (especialidad.isNotEmpty())
+                doctores.filter { it.especialidad == especialidad }
+            else emptyList()
+        )
+    }
 
-    // Solo consultas libres (paciente_id = null)
-    val consultasLibres = consultasDelDoctor.filter { it.paciente == null }
+// 🔹 Consultas del doctor seleccionado (reactivo)
+    val consultasDelDoctor by remember(doctorIdSeleccionado, consultas) {
+        mutableStateOf(
+            if (doctorIdSeleccionado != null)
+                consultas.filter { it.doctor?.id == doctorIdSeleccionado }
+            else emptyList()
+        )
+    }
 
-    // Horas disponibles reales desde la BD
-    val horasDisponibles = consultasLibres.map { it.hora }
+// 🔹 Consultas libres del doctor (reactivo)
+    val consultasLibres by remember(consultasDelDoctor) {
+        mutableStateOf(
+            consultasDelDoctor.filter { it.paciente == null }
+        )
+    }
 
-    // ---------------- UI ----------------
+// 🔹 Horas disponibles reales (reactivo)
+    val horasDisponibles by remember(consultasLibres) {
+        mutableStateOf(
+            consultasLibres.map { it.hora }
+        )
+    }
+
 
     Scaffold(
         topBar = {

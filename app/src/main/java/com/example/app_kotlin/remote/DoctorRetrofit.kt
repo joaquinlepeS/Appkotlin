@@ -6,17 +6,14 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-
 object DoctorRetrofit {
 
-    private const val BASE_URL = "https://randomuser.me/"
+    private const val BASE_URL = "http://10.0.2.2:8080/"
 
-    // Logging interceptor — muestra TODO el JSON en Logcat
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
-    // Cliente HTTP con timeout extendido
     private val client = OkHttpClient.Builder()
         .addInterceptor(logging)
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -24,12 +21,7 @@ object DoctorRetrofit {
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    // Retrofit instance
     val api: DoctorApiService by lazy {
-
-        println("DEBUG → INICIALIZANDO RETROFIT DOCTOR...")
-        println("DEBUG → Base URL: $BASE_URL")
-
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(client)

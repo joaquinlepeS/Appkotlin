@@ -47,6 +47,8 @@ fun AgendaScreen(
     var doctorNombreMostrado by remember { mutableStateOf("") }
     var doctorIdSeleccionado by remember { mutableStateOf<Long?>(null) }
     var horaSeleccionada by remember { mutableStateOf("") }
+    var fechaSeleccionada by remember { mutableStateOf("") }
+    var consultaSeleccionada by remember { mutableStateOf<Consulta?>(null) }
 
     var expandedEspecialidad by remember { mutableStateOf(false) }
     var expandedDoctor by remember { mutableStateOf(false) }
@@ -83,10 +85,9 @@ fun AgendaScreen(
 
 // 🔹 Horas disponibles reales (reactivo)
     val horasDisponibles by remember(consultasLibres) {
-        mutableStateOf(
-            consultasLibres.map { it.hora }
-        )
+        mutableStateOf(consultasLibres)
     }
+
 
 
     Scaffold(
@@ -194,15 +195,18 @@ fun AgendaScreen(
                     expanded = expandedHora,
                     onDismissRequest = { expandedHora = false }
                 ) {
-                    horasDisponibles.forEach { h ->
+                    horasDisponibles.forEach { consulta ->
                         DropdownMenuItem(
-                            text = { Text(h) },
+                            text = { Text("${consulta.hora} — ${consulta.fecha}") },
                             onClick = {
-                                horaSeleccionada = h
+                                horaSeleccionada = consulta.hora
+                                fechaSeleccionada = consulta.fecha  // si quieres guardarla también
+                                consultaSeleccionada = consulta      // para usar su id al agendar
                                 expandedHora = false
                             }
                         )
                     }
+
                 }
             }
 

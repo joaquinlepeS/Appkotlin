@@ -14,6 +14,7 @@ import com.example.app_kotlin.viewmodel.DoctorViewModel
 import com.example.app_kotlin.viewmodel.PacienteViewModel
 import com.google.gson.Gson
 import android.util.Base64
+import com.example.app_kotlin.viewmodel.HospitalViewModel
 
 @Composable
 fun AppNavHost() {
@@ -24,6 +25,7 @@ fun AppNavHost() {
     val pacienteViewModel: PacienteViewModel = viewModel()
     val consultaViewModel: ConsultaViewModel = viewModel()
     val doctorViewModel: DoctorViewModel = viewModel()
+    val hospitalViewModel: HospitalViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -57,6 +59,7 @@ fun AppNavHost() {
                 pacienteViewModel = pacienteViewModel,
                 consultaViewModel = consultaViewModel,
                 doctorViewModel = doctorViewModel,
+                hospitalViewModel = hospitalViewModel,
                 onNavigateToAgenda = {
                     navController.navigate(Screens.AGENDA)
                 },
@@ -67,7 +70,9 @@ fun AppNavHost() {
                     navController.navigate(Screens.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
-                }
+                },
+                onNavigateToHospitales =
+                    { navController.navigate(Screens.HOSPITALES) }
             )
         }
 
@@ -119,5 +124,13 @@ fun AppNavHost() {
                 onAgendar = { navController.navigate(Screens.AGENDA) }
             )
         }
+
+        //HOSPITALES
+        composable(Screens.HOSPITALES) {
+            HospitalesScreen(
+                viewModel = hospitalViewModel
+            )
+        }
+
     }
 }

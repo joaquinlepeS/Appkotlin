@@ -20,6 +20,7 @@ import com.example.app_kotlin.R
 import com.example.app_kotlin.model.Consulta
 import com.example.app_kotlin.viewmodel.ConsultaViewModel
 import com.example.app_kotlin.viewmodel.DoctorViewModel
+import com.example.app_kotlin.viewmodel.HospitalViewModel
 import com.example.app_kotlin.viewmodel.PacienteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,9 +29,11 @@ fun ConsultaClienteScreen(
     pacienteViewModel: PacienteViewModel,
     consultaViewModel: ConsultaViewModel,
     doctorViewModel: DoctorViewModel,
+    hospitalViewModel: HospitalViewModel,
     onNavigateToAgenda: () -> Unit,
     onNavigateToDoctorList: () -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    onNavigateToHospitales: () -> Unit
 ) {
 
     val usuarioActual = pacienteViewModel.pacienteActual ?: return
@@ -130,6 +133,14 @@ fun ConsultaClienteScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
+
+                Button(
+                    onClick = onNavigateToHospitales,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Hospitales cercanos")
+                }
+
 
 
                 if (consultas.isEmpty()) {

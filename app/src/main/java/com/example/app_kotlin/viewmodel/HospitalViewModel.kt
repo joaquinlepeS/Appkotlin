@@ -6,6 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.app_kotlin.model.Hospital
 import com.example.app_kotlin.repository.HospitalRepository
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+
 
 
 class HospitalViewModel : ViewModel() {

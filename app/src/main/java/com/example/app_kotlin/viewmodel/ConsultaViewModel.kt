@@ -136,4 +136,28 @@ class ConsultaViewModel : ViewModel() {
             }
         }
     }
+
+    fun liberarConsulta(consulta: Consulta) {
+        viewModelScope.launch {
+            try {
+                isLoading = true
+
+                val consultaLiberada = consulta.copy(paciente = null)
+
+                consultaSeleccionada = repository.update(
+                    id = consulta.id!!,
+                    consulta = consultaLiberada
+                )
+
+                // Recargar lista para que UI se actualice
+                loadByPaciente(consulta.paciente?.id ?: -1)
+
+            } catch (e: Exception) {
+                errorMessage = e.localizedMessage ?: "Error al liberar consulta"
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
 }

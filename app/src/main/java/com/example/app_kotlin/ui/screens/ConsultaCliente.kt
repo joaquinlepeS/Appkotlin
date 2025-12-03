@@ -148,8 +148,7 @@ fun ConsultaClienteScreen(
                             ConsultaCard(
                                 consulta = consulta,
                                 onEliminar = {
-                                    consultaViewModel.deleteConsulta(consulta.id!!)
-                                    consultaViewModel.loadByPaciente(pacienteId)
+                                    consultaViewModel.liberarConsulta(consulta)
                                 }
                             )
                         }

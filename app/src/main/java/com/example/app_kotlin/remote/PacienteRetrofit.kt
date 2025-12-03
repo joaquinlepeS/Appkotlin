@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 
 object PacienteRetrofit {
 
-    private const val BASE_URL = "http://192.168.1.211:8080/"
+    private const val BASE_URL = "http://10.0.2.16:8080/"
 
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY

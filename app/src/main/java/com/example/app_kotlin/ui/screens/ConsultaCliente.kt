@@ -134,12 +134,16 @@ fun ConsultaClienteScreen(
                     )
                 }
 
+
+
                 Button(
                     onClick = onNavigateToHospitales,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Hospitales cercanos")
                 }
+
+                Spacer(modifier = Modifier.height(20.dp))
 
 
 

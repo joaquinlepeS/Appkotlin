@@ -2,9 +2,9 @@ package com.example.app_kotlin.model
 
 
 data class Hospital(
-    val id: Long,
-    val lat: Double,
-    val lon: Double,
-    val name: String?,
+    val id: Long? = null,
+    val lat: Double? = null,
+    val lon: Double? = null,
+    val name: String? = null,
     val phone: String? = null
 )

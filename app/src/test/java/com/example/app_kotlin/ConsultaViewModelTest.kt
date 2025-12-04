@@ -26,7 +26,7 @@ class ConsultaViewModelTest {
         repository = mock()
         viewModel = ConsultaViewModel()
 
-        // ⚠ Reemplazo del repositorio vía reflexión
+        //  Reemplazo del repositorio vía reflexión
         val repoField = ConsultaViewModel::class.java.getDeclaredField("repository")
         repoField.isAccessible = true
         repoField.set(viewModel, repository)

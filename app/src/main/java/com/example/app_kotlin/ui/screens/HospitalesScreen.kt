@@ -32,7 +32,7 @@ fun HospitalScreen(
     ) {
         // Imagen de fondo
         Image(
-            painter = painterResource(id = R.drawable.fondo_login), // usa tu fondo real aquí
+            painter = painterResource(id = R.drawable.wallpaper), // usa tu fondo real aquí
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
@@ -52,7 +52,7 @@ fun HospitalScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            "Hospitales en Chile",
+                            "Buscador de Hospitales",
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )

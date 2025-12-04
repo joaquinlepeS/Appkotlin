@@ -12,7 +12,7 @@ class PacienteViewModel : ViewModel() {
     private val repository = PacienteRepository()
 
     var pacienteActual by mutableStateOf<Paciente?>(null)
-        private set
+
 
     var isLoading by mutableStateOf(false)
         private set

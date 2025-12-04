@@ -1,34 +1,41 @@
 package com.example.app_kotlin.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.app_kotlin.model.Hospital
 import com.example.app_kotlin.repository.HospitalRepository
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-
-
+import androidx.compose.runtime.*
 
 class HospitalViewModel : ViewModel() {
 
-    private val repo = HospitalRepository()
+    private val repository = HospitalRepository()
 
     var hospitales by mutableStateOf<List<Hospital>>(emptyList())
-    var isLoading by mutableStateOf(false)
-    var error by mutableStateOf<String?>(null)
+        private set
 
-    fun cargarHospitales() {
+    var loading by mutableStateOf(false)
+        private set
+
+    var errorMessage by mutableStateOf<String?>(null)
+        private set
+
+
+    fun buscarHospitales(ciudad: String) {
         viewModelScope.launch {
             try {
-                isLoading = true
-                hospitales = repo.obtenerHospitalesSantiago()
+                loading = true
+                errorMessage = null
+                hospitales = repository.buscarPorCiudad(ciudad)
+
+                if (hospitales.isEmpty()) {
+                    errorMessage = "No se encontraron hospitales en '$ciudad'"
+                }
+
             } catch (e: Exception) {
-                error = e.message
+                errorMessage = "Error: ${e.message}"
             } finally {
-                isLoading = false
+                loading = false
             }
         }
     }

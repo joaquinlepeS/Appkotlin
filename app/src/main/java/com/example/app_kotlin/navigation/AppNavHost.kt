@@ -127,7 +127,7 @@ fun AppNavHost() {
 
         //HOSPITALES
         composable(Screens.HOSPITALES) {
-            HospitalesScreen(
+            HospitalScreen(
                 viewModel = hospitalViewModel
             )
         }

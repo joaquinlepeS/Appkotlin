@@ -1,14 +1,14 @@
 package com.example.app_kotlin.remote
 
 
-import com.example.app_kotlin.model.HospitalResponse
-import retrofit2.http.GET
-import retrofit2.http.Query
+import okhttp3.ResponseBody
+import retrofit2.http.*
 
 interface HospitalApiService {
 
-    @GET("interpreter")
+    @FormUrlEncoded
+    @POST("interpreter")
     suspend fun getHospitales(
-        @Query("data") query: String
-    ): HospitalResponse
+        @Field("data") query: String
+    ): ResponseBody
 }

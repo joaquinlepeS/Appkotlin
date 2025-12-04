@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.app_kotlin.R
 import com.example.app_kotlin.viewmodel.PacienteViewModel
@@ -99,14 +100,16 @@ fun RegistroScreen(
                             value = password,
                             onValueChange = { password = it },
                             label = { Text("Contraseña") },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            visualTransformation = PasswordVisualTransformation()
                         )
 
                         OutlinedTextField(
                             value = password2,
                             onValueChange = { password2 = it },
                             label = { Text("Repetir Contraseña") },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            visualTransformation = PasswordVisualTransformation()
                         )
 
                         if (errorMsg != null) {

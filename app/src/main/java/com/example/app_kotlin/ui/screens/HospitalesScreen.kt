@@ -3,6 +3,7 @@ package com.example.app_kotlin.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -128,9 +129,11 @@ fun HospitalScreen(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 8.dp)
                     ) {
                         items(viewModel.hospitales) { h ->
                             Card(

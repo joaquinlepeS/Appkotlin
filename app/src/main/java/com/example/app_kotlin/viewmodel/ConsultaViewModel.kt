@@ -28,9 +28,6 @@ class ConsultaViewModel : ViewModel() {
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
-    // ------------------------------
-    // 🔷 FUNCIONES PARA LA UI
-    // ------------------------------
 
     fun loadAll() {
         viewModelScope.launch {

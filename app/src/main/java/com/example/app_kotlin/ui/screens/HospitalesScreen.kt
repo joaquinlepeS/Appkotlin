@@ -26,12 +26,10 @@ fun HospitalScreen(
 ) {
     var ciudad by remember { mutableStateOf("") }
 
-    // ------------------- FONDO GLOBAL -------------------
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        // Imagen de fondo
         Image(
             painter = painterResource(id = R.drawable.wallpaper), // usa tu fondo real aquí
             contentDescription = null,
@@ -46,7 +44,6 @@ fun HospitalScreen(
                 .background(Color(0xAA000000))
         )
 
-        // ------------------- CONTENIDO -------------------
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
@@ -74,7 +71,6 @@ fun HospitalScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                // ---------------- BUSCADOR ----------------
                 OutlinedTextField(
                     value = ciudad,
                     onValueChange = { ciudad = it },
@@ -107,17 +103,13 @@ fun HospitalScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // ---------------- LOADING ----------------
                 if (viewModel.loading) {
                     CircularProgressIndicator(color = Color.White)
                 }
 
-                // ---------------- ERROR ----------------
                 viewModel.errorMessage?.let {
                     Text(it, color = Color.Red, fontWeight = FontWeight.Bold)
                 }
-
-                // ---------------- RESULTADOS ----------------
                 if (viewModel.hospitales.isNotEmpty()) {
 
                     Text(

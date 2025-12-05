@@ -8,9 +8,7 @@ import org.json.JSONObject
 
 class HospitalRepository {
 
-    /**
-     * Busca hospitales usando Overpass basado en el nombre de la ciudad.
-     */
+
     suspend fun buscarPorCiudad(ciudad: String): List<Hospital> =
         withContext(Dispatchers.IO) {
 
@@ -28,9 +26,7 @@ class HospitalRepository {
         }
 
 
-    /**
-     * Convierte el JSON de Overpass a la lista de Hospital()
-     */
+
     private fun parseHospitals(json: String): List<Hospital> {
         val jsonObj = JSONObject(json)
         val elements = jsonObj.getJSONArray("elements")
